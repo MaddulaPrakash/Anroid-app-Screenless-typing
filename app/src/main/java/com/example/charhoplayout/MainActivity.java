@@ -24,6 +24,7 @@ import android.widget.TextView;
 import com.tapwithus.sdk.TapListener;
 import com.tapwithus.sdk.TapSdk;
 import com.tapwithus.sdk.TapSdkFactory;
+//import com.tapwithus.sdk.airmouse.AirMousePacket;
 import com.tapwithus.sdk.airmouse.AirMousePacket;
 import com.tapwithus.sdk.bluetooth.BluetoothManager;
 import com.tapwithus.sdk.bluetooth.TapBluetoothManager;
@@ -92,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     private boolean inScrollMode = false;
     private boolean inAlphabetMode = false;
     private char[] alphabet = " abcdefghijklmnopqrstuvwxyz ".toCharArray();
-    private int alphabetIndex = 0;
+    int alphabetIndex = 0;
 
     private int alphabetCounter = 0;
     private boolean selectingAlphabet = false;
@@ -291,7 +292,20 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
                 retAlphabetString += glAlphabetString;
 
+                System.out.println("glAlphabetString: " + glAlphabetString);
                 System.out.println("retAlphabetString: " + retAlphabetString);
+
+                if(alphabetIndex == 27) {
+                    tts.setPitch(1.5f);
+                    tts.speak("space", TextToSpeech.QUEUE_FLUSH, null, null);
+                    Log.d("selection speak out space ", "alphabetIndex" + alphabetIndex);
+                    tts.setPitch(1.0f);
+                }
+                else {
+                    tts.setPitch(1.5f);
+                    tts.speak(glAlphabetString, TextToSpeech.QUEUE_FLUSH, null, null);
+                    tts.setPitch(1.0f);
+                }
 
                 // need to store alphabet in a string array
             }
@@ -321,8 +335,13 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 //countTotalTaps.performCounting("alModeSelection");
             }
             // alMode -> SpeakOut
-            else if(!allowSearchScan & isNumberMode==false & isspecialCharMode==false & isAutoSuggestionMode==false & data == 30)
+            else if(!allowSearchScan & isNumberMode==false & isspecialCharMode==false & isAutoSuggestionMode==false & data == 15 || data == 14)
             {
+                System.out.println("retAlphabetString: data is " + data);
+                System.out.println("retAlphabetString: " + retAlphabetString);
+                tts.setPitch(1.5f);
+                tts.speak(retAlphabetString,TextToSpeech.QUEUE_FLUSH,null,null);
+                tts.setPitch(1.0f);
                 //alMode.alModeSpeakOut(tts,tyString.alreadyTyped);
 
                 //countTotalTaps.performCounting("alModeSpeakOut");
@@ -632,16 +651,16 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             //log(tapIdentifier+"mkmouseinputreceived"+data.dx.getInt()+","+data.dy.getInt());
             //log(tapIdentifier+"mkmouseinputreceived"+data.dx.getInt()+","+data.dy.getInt());
 
-            if (data.dy.getInt() != 0 ){
+            if (data.dy.getInt() > 0 ){ //forward scroll
                 inScrollMode = true;
                 //tts.speak(" Alphabets scroll mode", TextToSpeech.QUEUE_FLUSH, null, null);
 
                 if (isAlphabetModeActive == true) {
-                    Log.d("indexfinger scroll - scroll through alphabets", "data" + data.dy.getInt());
+                    Log.d("indexfinger forward scroll - scroll through alphabets", "data" + data.dy.getInt());
 
                     alphabetCounter++;
-                    Log.d("alphabet counter val ", "alphabetCounter" + alphabetCounter);
-                    if(alphabetCounter > 22){
+                    Log.d("Falphabet counter val ", "alphabetCounter" + alphabetCounter);
+                    if(alphabetCounter > 25){
                         alphabetCounter = 0;
                         alphabetIndex++;
                         if (alphabetIndex < 0) {
@@ -652,22 +671,23 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         }
                         if (alphabetIndex == 27){
                             tts.speak("space",TextToSpeech.QUEUE_FLUSH,null,null);
-                            Log.d("speak out space ", "alphabetIndex" + alphabetIndex);
+                            Log.d("Fspeak out space ", "alphabetIndex" + alphabetIndex);
                             //Log.d("alphabet index value", "alphabetIndex" + alphabetIndex);
                             String currentAlphabet = String.valueOf(alphabet[alphabetIndex]);
-                            System.out.println("Scrolling to: " + currentAlphabet);
+                            System.out.println("FScrolling to: " + currentAlphabet);
+                            alphabetIndex = 0;//reset the position
                         }
                         else {
-                            Log.d("alphabet index value", "alphabetIndex" + alphabetIndex);
+                            Log.d("Falphabet index value", "alphabetIndex" + alphabetIndex);
                             String currentAlphabet = String.valueOf(alphabet[alphabetIndex]);
                             glAlphabetString = currentAlphabet;
-                            System.out.println("Scrolling to: " + currentAlphabet);
-                            System.out.println("glAlphabetString: " + glAlphabetString);
+                            System.out.println("FScrolling to: " + currentAlphabet);
+                            System.out.println("FglAlphabetString: " + glAlphabetString);
                             tts.speak(currentAlphabet, TextToSpeech.QUEUE_FLUSH, null, null);
                         }
                     }
                     else {
-                        Log.i("mk do nothing",tapIdentifier);
+                        Log.i("Fmk do nothing",tapIdentifier);
                     }
 
                     /*
@@ -703,7 +723,43 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     //tapData.put("alphabet", Character.toString(newAlphabetChar));
                 }
                 else {
-                    Log.i("Not in  alphabet mode",tapIdentifier);
+                    Log.i("FNot in  alphabet mode",tapIdentifier);
+                }
+            }
+            else if (data.dy.getInt() < 0){ //backward scroll
+                inScrollMode = true;
+                if (isAlphabetModeActive == true) {
+                    Log.d("indexfinger backward scroll - scroll through alphabets", "data" + data.dy.getInt());
+
+                    alphabetCounter++;
+                    Log.d("Balphabet counter val ", "alphabetCounter" + alphabetCounter);
+                    if (alphabetCounter > 25) {
+                        alphabetCounter = 0;
+                        alphabetIndex--;
+                        if (alphabetIndex == 0) {
+                            alphabetIndex = 27;
+                        } else if (alphabetIndex >= alphabet.length) {
+                            alphabetIndex = alphabet.length - 1;
+                        }
+
+                        if (alphabetIndex == 27) {
+                            tts.speak("space", TextToSpeech.QUEUE_FLUSH, null, null);
+                            Log.d("Bspeak out space ", "alphabetIndex" + alphabetIndex);
+                            //Log.d("alphabet index value", "alphabetIndex" + alphabetIndex);
+                            String currentAlphabet = String.valueOf(alphabet[alphabetIndex]);
+                            System.out.println("Scrolling to: " + currentAlphabet);
+                            //alphabetIndex = 0;// no need reset the position
+                        } else {
+                            Log.d("Balphabet index value", "alphabetIndex" + alphabetIndex);
+                            String currentAlphabet = String.valueOf(alphabet[alphabetIndex]);
+                            glAlphabetString = currentAlphabet;
+                            System.out.println("BScrolling to: " + currentAlphabet);
+                            System.out.println("BglAlphabetString: " + glAlphabetString);
+                            tts.speak(currentAlphabet, TextToSpeech.QUEUE_FLUSH, null, null);
+                        }
+                    } else {
+                        Log.i("Bmk do nothing", tapIdentifier);
+                    }
                 }
             }
             else {
@@ -713,10 +769,10 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
         }
 
-        //@Override
-        //public void onAirMouseInputReceived(@NonNull String tapIdentifier, @NonNull AirMousePacket data) {
+        @Override
+        public void onAirMouseInputReceived(@NonNull String tapIdentifier, @NonNull AirMousePacket data) {
 
-        //}
+        }
 
         @Override
         public void onError(@NonNull String tapIdentifier, int code, @NonNull String description) {
