@@ -713,10 +713,10 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
         }
 
-        @Override
-        public void onAirMouseInputReceived(@NonNull String tapIdentifier, @NonNull AirMousePacket data) {
+        //@Override
+        //public void onAirMouseInputReceived(@NonNull String tapIdentifier, @NonNull AirMousePacket data) {
 
-        }
+        //}
 
         @Override
         public void onError(@NonNull String tapIdentifier, int code, @NonNull String description) {
