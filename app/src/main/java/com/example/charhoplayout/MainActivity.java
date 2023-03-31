@@ -1,9 +1,6 @@
-/*
-* Developer : Anup Atul Mulay
-* Contact Number: +1-317-998-0306
-* email: anup.mulay96@gmail.com / anmulay@iupui.edu
-* */
 package com.example.charhoplayout;
+import static com.example.charhoplayout.EarconManager.deleteChar;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -76,14 +73,14 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     String[] splited;
 
     /*
-    * Buttons and TextView Declaration
-    * */
+     * Buttons and TextView Declaration
+     * */
     Button btnGetInfo,btnResetInfo;
     TextView tvInfo;
 
     /*
-    * Count Total Taps Declaration
-    * */
+     * Count Total Taps Declaration
+     * */
     CountTotalTaps countTotalTaps;
 
     Tap tap;
@@ -166,6 +163,10 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             public void onClick(View v) {
                 countTotalTaps = countTotalTaps.resetCounting();
                 String res = countTotalTaps.displayTotalTapsCount();
+                if (!retAlphabetString.isEmpty() || alphabetIndex == 0) {
+                    retAlphabetString = "";
+                    alphabetIndex = 0;
+                }
                 tvInfo.setText(res);
                 tvInfo.setTextColor(Color.RED);
             }
@@ -223,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
             alMode.speakOut(tts,"Tap Strap connected to the phone. You can start keyflow");   // SpeakOut once tapStrap connected to phone
 
-            alMode.alModeInitialise();      // Initialise Alphabet Mode
+            //alMode.alModeInitialise();      // Initialise Alphabet Mode
             nmMode.nmModeInitialise();      // Initialise Number Mode
             specialCharMode.spModeInitialise(); // Initialise Special Char Mode
 
@@ -231,6 +232,13 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             earconManager.setupEarcons(MainActivity.tts,getApplicationContext().getPackageName());
 
             CustomMouseListener(tap);
+
+            if (!retAlphabetString.isEmpty() || alphabetIndex == 0) {
+                retAlphabetString = "";
+                glAlphabetString = "";
+                alphabetIndex = 0;
+                isAlphabetModeActive = false;
+            }
 
         }
 
@@ -271,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             //Log.i("isAlphabetModeActive value ", ((int) isAlphabetModeActive));
 
 
-                    /*
+            /*
              *  ###########Alphabet Mode Coding Starts Here################
              * */
 
@@ -295,13 +303,14 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 System.out.println("glAlphabetString: " + glAlphabetString);
                 System.out.println("retAlphabetString: " + retAlphabetString);
 
-                if(alphabetIndex == 27) {
+                if(glAlphabetString.equals(" ") ) {
                     tts.setPitch(1.5f);
                     tts.speak("space", TextToSpeech.QUEUE_FLUSH, null, null);
                     Log.d("selection speak out space ", "alphabetIndex" + alphabetIndex);
                     tts.setPitch(1.0f);
                 }
                 else {
+                    System.out.println("glAlphabetString is not space " + glAlphabetString);
                     tts.setPitch(1.5f);
                     tts.speak(glAlphabetString, TextToSpeech.QUEUE_FLUSH, null, null);
                     tts.setPitch(1.0f);
@@ -347,8 +356,12 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 //countTotalTaps.performCounting("alModeSpeakOut");
             }
             // alMode ->Deletion
-            else if(!allowSearchScan & isNumberMode==false & isspecialCharMode==false & isAutoSuggestionMode==false & data==16)
-            {/*
+            else if(data==8)
+            {
+                retAlphabetString = retAlphabetString.substring(0, retAlphabetString.length() - 1);
+                System.out.println(" Deletion retAlphabetString: " + retAlphabetString);
+
+                /*
                 String results;
                 results = alMode.alModeDelete(tts,tyString.alreadyTyped);
                 tyString.alreadyTyped = results;
@@ -651,7 +664,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             //log(tapIdentifier+"mkmouseinputreceived"+data.dx.getInt()+","+data.dy.getInt());
             //log(tapIdentifier+"mkmouseinputreceived"+data.dx.getInt()+","+data.dy.getInt());
 
-            if (data.dy.getInt() > 0 ){ //forward scroll
+            if (data.dy.getInt() > 3 ){ //forward scroll
                 inScrollMode = true;
                 //tts.speak(" Alphabets scroll mode", TextToSpeech.QUEUE_FLUSH, null, null);
 
@@ -660,7 +673,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
                     alphabetCounter++;
                     Log.d("Falphabet counter val ", "alphabetCounter" + alphabetCounter);
-                    if(alphabetCounter > 25){
+                    if(alphabetCounter > 19){
                         alphabetCounter = 0;
                         alphabetIndex++;
                         if (alphabetIndex < 0) {
@@ -670,11 +683,12 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                             alphabetIndex = alphabet.length - 1;
                         }
                         if (alphabetIndex == 27){
-                            tts.speak("space",TextToSpeech.QUEUE_FLUSH,null,null);
                             Log.d("Fspeak out space ", "alphabetIndex" + alphabetIndex);
                             //Log.d("alphabet index value", "alphabetIndex" + alphabetIndex);
                             String currentAlphabet = String.valueOf(alphabet[alphabetIndex]);
+                            glAlphabetString = currentAlphabet;
                             System.out.println("FScrolling to: " + currentAlphabet);
+                            tts.speak("space",TextToSpeech.QUEUE_FLUSH,null,null);
                             alphabetIndex = 0;//reset the position
                         }
                         else {
@@ -726,14 +740,14 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     Log.i("FNot in  alphabet mode",tapIdentifier);
                 }
             }
-            else if (data.dy.getInt() < 0){ //backward scroll
+            else if (data.dy.getInt() < -3){ //backward scroll
                 inScrollMode = true;
                 if (isAlphabetModeActive == true) {
                     Log.d("indexfinger backward scroll - scroll through alphabets", "data" + data.dy.getInt());
 
                     alphabetCounter++;
                     Log.d("Balphabet counter val ", "alphabetCounter" + alphabetCounter);
-                    if (alphabetCounter > 25) {
+                    if (alphabetCounter > 19) {
                         alphabetCounter = 0;
                         alphabetIndex--;
                         if (alphabetIndex == 0) {
@@ -743,11 +757,12 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         }
 
                         if (alphabetIndex == 27) {
-                            tts.speak("space", TextToSpeech.QUEUE_FLUSH, null, null);
                             Log.d("Bspeak out space ", "alphabetIndex" + alphabetIndex);
                             //Log.d("alphabet index value", "alphabetIndex" + alphabetIndex);
                             String currentAlphabet = String.valueOf(alphabet[alphabetIndex]);
+                            glAlphabetString = currentAlphabet;
                             System.out.println("Scrolling to: " + currentAlphabet);
+                            tts.speak("space", TextToSpeech.QUEUE_FLUSH, null, null);
                             //alphabetIndex = 0;// no need reset the position
                         } else {
                             Log.d("Balphabet index value", "alphabetIndex" + alphabetIndex);
