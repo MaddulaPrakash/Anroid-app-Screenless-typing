@@ -349,7 +349,13 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 System.out.println("retAlphabetString: data is " + data);
                 System.out.println("retAlphabetString: " + retAlphabetString);
                 tts.setPitch(1.5f);
-                tts.speak(retAlphabetString,TextToSpeech.QUEUE_FLUSH,null,null);
+                if (retAlphabetString.length()==0) {
+                    tts.speak("No message typed", TextToSpeech.QUEUE_FLUSH, null, null);
+                }
+                else
+                {
+                    tts.speak(retAlphabetString, TextToSpeech.QUEUE_FLUSH, null, null);
+                }
                 tts.setPitch(1.0f);
                 //alMode.alModeSpeakOut(tts,tyString.alreadyTyped);
 
@@ -358,8 +364,11 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             // alMode ->Deletion
             else if(data==8)
             {
-                retAlphabetString = retAlphabetString.substring(0, retAlphabetString.length() - 1);
+                String deleted_alphabet = String.valueOf(retAlphabetString.charAt(retAlphabetString.length() - 1));
                 System.out.println(" Deletion retAlphabetString: " + retAlphabetString);
+                tts.speak(deleted_alphabet,TextToSpeech.QUEUE_ADD,null,null);
+                retAlphabetString = retAlphabetString.substring(0, retAlphabetString.length() - 1);
+                tts.playEarcon(deleteChar,TextToSpeech.QUEUE_FLUSH,null,null);
 
                 /*
                 String results;
