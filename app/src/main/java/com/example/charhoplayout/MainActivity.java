@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     private static final int MY_PERMISSIONS_REQUEST_BLUETOOTH_CONNECT = 1234;
 
     static final int MOUSE_SPEED = 5; // adjust as needed
-a
+
     static final String OUTPUT_PREFIX = "key_input("; // the prefix of the output string for typing a letter
     /*
      * Static Variable Declaration
@@ -598,16 +598,15 @@ a
             /*
              *   #####Autosuggestions Mode
              * */
-            /*
             else if(!allowSearchScan & isNumberMode==false & numberModeToggle==0 & isspecialCharMode==false & isAutoSuggestionMode==false & autoSuggestionModeToggle ==0 & data==9)
             {
-                if (tyString.alreadyTyped.length() == 0)
+                if (retAlphabetString.length() == 0)
                 {
                     tts.speak("Nothing typed No Autosuggestions ",TextToSpeech.QUEUE_FLUSH,null,null);
                 }
                 else
                 {
-                    String str = tyString.alreadyTyped;
+                    String str = retAlphabetString;
                     splited = str.split("\\s+");
                     str1 = splited[splited.length - 1];
                     SuggestionsResult = autoSuggestionsMode.fetchAutoSuggestions(getApplicationContext(),tts,str1);
@@ -618,8 +617,8 @@ a
                 }
 
                 countTotalTaps.performCounting("autoSuggestionModeFetch");
-            }
-            else if(!allowSearchScan & isNumberMode==false & numberModeToggle==0 & isspecialCharMode==false & isAutoSuggestionMode==true & autoSuggestionModeToggle ==1 & data==9)
+            }/*
+            else if(!allowSearchScan & isNumberModeActive==false & numberModeToggle==0 & isspecialCharMode==false & isAutoSuggestionMode==true & autoSuggestionModeToggle ==1 & data==9)
             {
                 tts.speak("Exit AutoSuggestions Mode ",TextToSpeech.QUEUE_FLUSH,null,null);
                 isAutoSuggestionMode=false;
@@ -627,19 +626,19 @@ a
 
                 countTotalTaps.performCounting("autoSuggestionModeExit");
             }
-            else if(!allowSearchScan & isNumberMode==false & numberModeToggle==0 & isspecialCharMode==false & isAutoSuggestionMode==true & autoSuggestionModeToggle ==1 & data==2) // Forward Navigation in AutoSuggestion Mode
+            else if(!allowSearchScan & isNumberModeActive==false & numberModeToggle==0 & isspecialCharMode==false & isAutoSuggestionMode==true & autoSuggestionModeToggle ==1 & data==2) // Forward Navigation in AutoSuggestion Mode
             {
                 autoSuggestionsMode.forwardNavigateSuggestions(tts,SuggestionsResult);
 
                 countTotalTaps.performCounting("autoSuggestionModeForwardNav");
-            }
-            else if(!allowSearchScan & isNumberMode==false & numberModeToggle==0 & isspecialCharMode==false & isAutoSuggestionMode==true & autoSuggestionModeToggle ==1 & data==1)//Selection in AutoSuggestion Mode
+            }*/
+            else if(!allowSearchScan & isNumberModeActive==false & numberModeToggle==0 & isspecialCharMode==false & isAutoSuggestionMode==true & autoSuggestionModeToggle ==1 & data==1)//Selection in AutoSuggestion Mode
             {
                 String word = autoSuggestionsMode.selectAutoSuggestion(tts);
 
-                if(tyString.alreadyTyped.contains(" "))
+                if(retAlphabetString.contains(" "))
                 {
-                    tyString.alreadyTyped = "";
+                    retAlphabetString = "";
 
                     String temp="";
                     for(int i=0; i < splited.length-1; i++)
@@ -651,17 +650,17 @@ a
                         }
                         temp = temp +" "+splited[i];
                     }
-                    tyString.alreadyTyped = temp+" "+word;
+                    retAlphabetString = temp+" "+word;
                 }
                 else
                 {
-                    tyString.alreadyTyped = word;
+                    retAlphabetString = word;
                 }
 
-                Log.d("TypedString",tyString.alreadyTyped);
+                Log.d("TypedString",retAlphabetString);
 
-                countTotalTaps.performCounting("autoSuggestionModeSelection");
-            }*/
+//                countTotalTaps.performCounting("autoSuggestionModeSelection");
+            }
         }
 
         @Override
@@ -740,6 +739,9 @@ a
                         System.out.println("FglNumberString: " + glAlphabetString);
                         tts.speak(currentNumber, TextToSpeech.QUEUE_FLUSH, null, null);
                     }
+                } else if (isAutoSuggestionMode==true) {
+                    Log.d("Auto Suggestions Mode", "data" + data.dy.getInt());
+                    autoSuggestionsMode.forwardNavigateSuggestions(tts,SuggestionsResult);
                 }
             }
             else if (data.dy.getInt() < -3){ //backward scroll
