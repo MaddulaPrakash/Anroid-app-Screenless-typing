@@ -296,6 +296,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 //alMode.alModeInitialise();
                 isAlphabetModeActive = true;
                 isNumberModeActive = false;
+                isAutoSuggestionMode = false;
 
                 // alMode.alModeForward(tts);
 
@@ -805,6 +806,10 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         Log.i("Bmk do nothing", tapIdentifier);
                     }
                 }
+                else if (isAutoSuggestionMode==true) {
+                                    Log.d("Auto Suggestions Mode", "data" + data.dy.getInt());
+                                    autoSuggestionsMode.backwardNavigateSuggestions(tts,SuggestionsResult);
+                                }                
             }
             else {
                 inScrollMode = false;
