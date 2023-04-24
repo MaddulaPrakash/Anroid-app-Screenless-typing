@@ -99,6 +99,9 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
     private int alphabetCounter = 0;
     private int numberCounter = 0;
+
+    //Auto Suggestion counter
+    private int autoSuggestionCounter = 0;
     private boolean selectingAlphabet = false;
     private String selectedAlphabet = null;
 
@@ -740,8 +743,15 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         tts.speak(currentNumber, TextToSpeech.QUEUE_FLUSH, null, null);
                     }
                 } else if (isAutoSuggestionMode==true) {
+                    autoSuggestionCounter++;
                     Log.d("Auto Suggestions Mode", "data" + data.dy.getInt());
-                    autoSuggestionsMode.forwardNavigateSuggestions(tts,SuggestionsResult);
+                    if (autoSuggestionCounter>=SuggestionsResult.size()){
+                        autoSuggestionCounter=0;
+                    }
+                    else {
+                        tts.speak(SuggestionsResult.get(autoSuggestionCounter),TextToSpeech.QUEUE_ADD,null,null);
+                    }
+
                 }
             }
             else if (data.dy.getInt() < -3){ //backward scroll
@@ -750,7 +760,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     Log.d("indexfinger backward scroll - scroll through alphabets", "data" + data.dy.getInt());
 
                     alphabetCounter++;
-                    Log.d("Balphabet counter val ", "alphabetCounter" + alphabetCounter);
+                    Log.d("alphabet counter val ", "alphabetCounter" + alphabetCounter);
                     if (alphabetCounter > 15) {
                         alphabetCounter = 0;
                         alphabetIndex--;
@@ -804,6 +814,14 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                      else {
                         Log.i("Bmk do nothing", tapIdentifier);
                     }
+                } else if (isAutoSuggestionMode==true) {
+                    if (autoSuggestionCounter <= 0){
+                        autoSuggestionCounter = SuggestionsResult.size();
+                    } else{
+                        autoSuggestionCounter--;
+                        Log.d("Auto Suggestions Mode", "data" + data.dy.getInt());
+                    }
+                    tts.speak(SuggestionsResult.get(autoSuggestionCounter),TextToSpeech.QUEUE_ADD,null,null);
                 }
             }
             else {
