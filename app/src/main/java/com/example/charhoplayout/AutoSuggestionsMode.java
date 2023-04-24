@@ -61,6 +61,19 @@ public class AutoSuggestionsMode {
         tts.speak(suggestionsResult.get(autoSuggestionHeadPoint),TextToSpeech.QUEUE_ADD,null,null);
         autoSuggestionHeadPoint++;
     }
+    
+    public void backwardNavigateSuggestions(TextToSpeech tts,ArrayList<String> suggestionsResult)
+    {
+        if(autoSuggestionHeadPoint==SuggestionsResult.size())
+        {
+            autoSuggestionHeadPoint=0;
+        }
+
+        if (autoSuggestionHeadPoint > 0){
+            tts.speak(suggestionsResult.get(autoSuggestionHeadPoint),TextToSpeech.QUEUE_ADD,null,null);
+            autoSuggestionHeadPoint--;
+        }
+    }    
 
     /*
     * Select the Auto Suggestion

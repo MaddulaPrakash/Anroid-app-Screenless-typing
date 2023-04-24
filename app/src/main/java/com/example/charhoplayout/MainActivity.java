@@ -299,6 +299,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 //alMode.alModeInitialise();
                 isAlphabetModeActive = true;
                 isNumberModeActive = false;
+                isAutoSuggestionMode = false;
 
                 // alMode.alModeForward(tts);
 
@@ -823,6 +824,10 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     }
                     tts.speak(SuggestionsResult.get(autoSuggestionCounter),TextToSpeech.QUEUE_ADD,null,null);
                 }
+                else if (isAutoSuggestionMode==true) {
+                                    Log.d("Auto Suggestions Mode", "data" + data.dy.getInt());
+                                    autoSuggestionsMode.backwardNavigateSuggestions(tts,SuggestionsResult);
+                                }                
             }
             else {
                 inScrollMode = false;
