@@ -1,8 +1,4 @@
-/*
-* Developer : Anup Atul Mulay
-* Contact Number: +1-317-998-0306
-* email: anup.mulay96@gmail.com / anmulay@iupui.edu
-* */
+
 package com.example.charhoplayout;
 import static com.example.charhoplayout.EarconManager.deleteChar;
 
