@@ -1,3 +1,8 @@
+/*
+* Developer : Anup Atul Mulay
+* Contact Number: +1-317-998-0306
+* email: anup.mulay96@gmail.com / anmulay@iupui.edu
+* */
 package com.example.charhoplayout;
 import static com.example.charhoplayout.EarconManager.deleteChar;
 
@@ -94,14 +99,17 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     private boolean inNumberMode = false;
     private char[] alphabet = " abcdefghijklmnopqrstuvwxyz ".toCharArray();
     private char[] number = " 0123456789".toCharArray();
+
+    private char[] specialCharacters = "&.@!*#$%?".toCharArray();
     int alphabetIndex = 0;
     int numberIndex = 0;
 
     private int alphabetCounter = 0;
     private int numberCounter = 0;
-
     //Auto Suggestion counter
-    private int autoSuggestionCounter = 0;
+    public int autoSuggestionCounter = 0;
+
+    private int specialCharacterCounter = 0;
     private boolean selectingAlphabet = false;
     private String selectedAlphabet = null;
 
@@ -235,7 +243,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
             //alMode.alModeInitialise();      // Initialise Alphabet Mode
             //nmMode.nmModeInitialise();      // Initialise Number Mode
-            specialCharMode.spModeInitialise(); // Initialise Special Char Mode
+            //specialCharMode.spModeInitialise(); // Initialise Special Char Mode
 
             EarconManager earconManager = new EarconManager();
             earconManager.setupEarcons(MainActivity.tts,getApplicationContext().getPackageName());
@@ -288,18 +296,19 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             //Log.i("isAlphabetModeActive value ", ((int) isAlphabetModeActive));
 
 
-                    /*
+            /*
              *  ###########Alphabet Mode Coding Starts Here################
              * */
 
             // alMode -> Forward
-            if(!allowSearchScan & isAlphabetModeActive == false & isNumberMode==false & isspecialCharMode==false & isAutoSuggestionMode==false & data==2)
+            if(!allowSearchScan & isAlphabetModeActive == false  & data==2)
             {
                 tts.speak("Entered Alphabet Mode",TextToSpeech.QUEUE_FLUSH,null,null);
                 //alMode.alModeInitialise();
                 isAlphabetModeActive = true;
                 isNumberModeActive = false;
                 isAutoSuggestionMode = false;
+                isspecialCharMode = false;
 
                 // alMode.alModeForward(tts);
 
@@ -330,7 +339,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 // need to store alphabet in a string array
             }
             // alMode -> SpeakOut
-            else if(!allowSearchScan & isNumberMode==false & isspecialCharMode==false & isAutoSuggestionMode==false & data == 15 || data == 14)
+            else if(data ==30)
             {
                 System.out.println("retAlphabetString: data is " + data);
                 System.out.println("retAlphabetString: " + retAlphabetString);
@@ -349,9 +358,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 //countTotalTaps.performCounting("alModeSpeakOut");
             }
             // alMode ->Deletion
-            else if(data==8)
+            else if(data==24)
             {
-
                 String deleted_alphabet = String.valueOf(retAlphabetString.charAt(retAlphabetString.length() - 1));
                 System.out.println(" Deletion retAlphabetString: " + retAlphabetString);
                 //tts.speak(deleted_alphabet,TextToSpeech.QUEUE_ADD,null,null);
@@ -377,6 +385,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
              * */
 
             // nmMode -> Enter
+
             else if(isNumberModeActive == false & data==4)
             {
                 tts.speak("Entered Number Mode",TextToSpeech.QUEUE_FLUSH,null,null);
@@ -386,6 +395,10 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 isNumberModeActive = true;
 
                 isAlphabetModeActive = false;
+
+                isAutoSuggestionMode=false;
+
+                isspecialCharMode = false;
 
 
                 //numberModeToggle=1;
@@ -470,16 +483,52 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
              * */
 
             // spMode -> Enter
-            /*
-            else if(!allowSearchScan & isNumberMode==false & numberModeToggle==0 & isspecialCharMode==false & isAutoSuggestionMode==false & data==5)
+
+            else if(isspecialCharMode==false & data==8)
             {
                 tts.speak("Entered Special Characters Mode",TextToSpeech.QUEUE_FLUSH,null,null);
-                isspecialCharMode=true;
-                spModeToggle=1;
-                specialCharMode.spModeInitialise();
+                Log.d("Entered Special Characters Mode","data"+data);
 
-                countTotalTaps.performCounting("specialCharModeEnter");
+                isspecialCharMode=true;
+                isAlphabetModeActive = false;
+                isNumberMode = false;
+                isAutoSuggestionMode = false;
+
+                //spModeToggle=1;
+                //specialCharMode.spModeInitialise();
+
+                //countTotalTaps.performCounting("specialCharModeEnter");
             }
+            else if(isspecialCharMode == true & data == 8){
+                //selectingAlphabet = true;
+                Log.d("Special Character selected ","data"+data);
+
+                retAlphabetString += glAlphabetString;
+
+                System.out.println("glAlphabetString: " + glAlphabetString);
+                System.out.println("retAlphabetString: " + retAlphabetString);
+
+                if(glAlphabetString.equals("#"))
+                {
+                    tts.setPitch(1.5f);
+                    tts.speak("Hash",TextToSpeech.QUEUE_FLUSH,null,null);
+                    tts.setPitch(1.0f);
+                }
+                else if(glAlphabetString.equals("$"))
+                {
+                    tts.setPitch(1.5f);
+                    tts.speak("Dollar",TextToSpeech.QUEUE_FLUSH,null,null);
+                    tts.setPitch(1.0f);
+                }
+                else
+                {
+                    tts.setPitch(1.5f);
+                    tts.speak(glAlphabetString, TextToSpeech.QUEUE_FLUSH, null, null);
+                    tts.setPitch(1.0f);
+                }
+            }
+
+            /*
             // spMode -> Exit
             else if(!allowSearchScan & isNumberMode==false & numberModeToggle==0 & isspecialCharMode==true & spModeToggle==1  & isAutoSuggestionMode==false & data==5)
             {
@@ -602,8 +651,14 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             /*
              *   #####Autosuggestions Mode
              * */
-            else if(!allowSearchScan & isNumberMode==false & numberModeToggle==0 & isspecialCharMode==false & isAutoSuggestionMode==false & autoSuggestionModeToggle ==0 & data==9)
+
+            else if(isNumberMode==false & isspecialCharMode==false & isAutoSuggestionMode==false & autoSuggestionModeToggle ==0 & data==14)
             {
+                isspecialCharMode=false;
+                isAlphabetModeActive = false;
+                isNumberMode = false;
+                isAutoSuggestionMode = true;
+
                 if (retAlphabetString.length() == 0)
                 {
                     tts.speak("Nothing typed No Autosuggestions ",TextToSpeech.QUEUE_FLUSH,null,null);
@@ -616,13 +671,18 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     SuggestionsResult = autoSuggestionsMode.fetchAutoSuggestions(getApplicationContext(),tts,str1);
                     if(SuggestionsResult != null)
                     {
+                        System.out.println("isAutoSuggestionMode is true");
                         isAutoSuggestionMode=true;
+                        isAlphabetModeActive = false;
+                    }
+                    else {
+                        System.out.println("isAutoSuggestionMode SuggestionsResult is null");
                     }
                 }
 
-                countTotalTaps.performCounting("autoSuggestionModeFetch");
+                //countTotalTaps.performCounting("autoSuggestionModeFetch");
             }/*
-            else if(!allowSearchScan & isNumberModeActive==false & numberModeToggle==0 & isspecialCharMode==false & isAutoSuggestionMode==true & autoSuggestionModeToggle ==1 & data==9)
+            else if(!allowSearchScan & isNumberModeActive==false & numberModeToggle==0 & isspecialCharMode==false & isAutoSuggestionMode==true & autoSuggestionModeToggle ==1 & data==14)
             {
                 tts.speak("Exit AutoSuggestions Mode ",TextToSpeech.QUEUE_FLUSH,null,null);
                 isAutoSuggestionMode=false;
@@ -634,15 +694,16 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             {
                 autoSuggestionsMode.forwardNavigateSuggestions(tts,SuggestionsResult);
 
-                countTotalTaps.performCounting("autoSuggestionModeForwardNav");
+                //countTotalTaps.performCounting("autoSuggestionModeForwardNav");
             }*/
-            else if(!allowSearchScan & isNumberModeActive==false & numberModeToggle==0 & isspecialCharMode==false & isAutoSuggestionMode==true & autoSuggestionModeToggle ==1 & data==1)//Selection in AutoSuggestion Mode
+            else if(isNumberModeActive==false & isspecialCharMode==false & isAutoSuggestionMode==true & data==14)//Selection in AutoSuggestion Mode
             {
-                String word = autoSuggestionsMode.selectAutoSuggestion(tts);
+                System.out.println("Auto suggestion mode selection");
+                String word = autoSuggestionsMode.selectAutoSuggestion(tts, autoSuggestionCounter);
 
                 if(retAlphabetString.contains(" "))
                 {
-                    retAlphabetString = "";
+                    retAlphabetString  = "";
 
                     String temp="";
                     for(int i=0; i < splited.length-1; i++)
@@ -654,16 +715,16 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         }
                         temp = temp +" "+splited[i];
                     }
-                    retAlphabetString = temp+" "+word;
+                    retAlphabetString  = temp+" "+word;
                 }
                 else
                 {
-                    retAlphabetString = word;
+                    retAlphabetString  = word;
                 }
 
-                Log.d("TypedString",retAlphabetString);
+                Log.d("TypedString",retAlphabetString );
 
-//                countTotalTaps.performCounting("autoSuggestionModeSelection");
+                //countTotalTaps.performCounting("autoSuggestionModeSelection");
             }
         }
 
@@ -672,12 +733,14 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
             Log.i("mkonMouseInputReceived",tapIdentifier);
             Log.d("mkMYINT","data"+data);
-            //Log.d("mkmousedx","data"+data.dx.getInt());
-            //Log.d("mkmousedy","data"+data.dy.getInt());
+            Log.d("mkmousedx","data"+data.dx.getInt());
+            Log.d("mkmousedy","data"+data.dy.getInt());
+            Log.d("mkmousedt","data"+data.dt.getInt());
+            Log.d("mkmouseproximity","data"+data.proximity.getInt());
             //log(tapIdentifier+"mkmouseinputreceived"+data.dx.getInt()+","+data.dy.getInt());
             //log(tapIdentifier+"mkmouseinputreceived"+data.dx.getInt()+","+data.dy.getInt());
 
-            if (data.dy.getInt() > 3 ){ //forward scroll
+            if (data.dy.getInt() > 1 ){ //forward scroll
                 inScrollMode = true;
                 //tts.speak(" Alphabets scroll mode", TextToSpeech.QUEUE_FLUSH, null, null);
 
@@ -701,6 +764,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                             String currentAlphabet = String.valueOf(alphabet[alphabetIndex]);
                             glAlphabetString = currentAlphabet;
                             System.out.println("FScrolling to: " + currentAlphabet);
+                            tts.setSpeechRate(2.0f);
                             tts.speak("space",TextToSpeech.QUEUE_FLUSH,null,null);
                             alphabetIndex = 0;//reset the position
                         }
@@ -710,6 +774,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                             glAlphabetString = currentAlphabet;
                             System.out.println("FScrolling to: " + currentAlphabet);
                             System.out.println("FglAlphabetString: " + glAlphabetString);
+                            tts.setSpeechRate(2.0f);
                             tts.speak(currentAlphabet, TextToSpeech.QUEUE_FLUSH, null, null);
                         }
                     }
@@ -722,7 +787,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
                     alphabetCounter++;
                     Log.d("Fnumber counter val ", "alphabetCounter" + alphabetCounter);
-                    if(alphabetCounter > 25){
+                    if(alphabetCounter > 18){
                         alphabetCounter = 0;
                         numberIndex++;
                         if (numberIndex < 0) {
@@ -735,7 +800,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                             numberIndex = 0;
                         }
 
-
                         Log.d("Fnumber index value", "numberIndex" + numberIndex);
                         String currentNumber = String.valueOf(number[numberIndex]);
                         glAlphabetString = currentNumber;
@@ -743,25 +807,71 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         System.out.println("FglNumberString: " + glAlphabetString);
                         tts.speak(currentNumber, TextToSpeech.QUEUE_FLUSH, null, null);
                     }
-                } else if (isAutoSuggestionMode==true) {
-                    autoSuggestionCounter++;
+                }
+                else if (isAutoSuggestionMode==true) {
+                    alphabetCounter++;
+
                     Log.d("Auto Suggestions Mode", "data" + data.dy.getInt());
-                    if (autoSuggestionCounter>=SuggestionsResult.size()){
-                        autoSuggestionCounter=0;
+                    //autoSuggestionsMode.forwardNavigateSuggestions(tts,SuggestionsResult);
+                    if(alphabetCounter > 10){
+                        autoSuggestionCounter++;
+                        alphabetCounter = 0;
+
+                        if (autoSuggestionCounter>=SuggestionsResult.size()){
+                            autoSuggestionCounter=0;
+                        }
+                        else {
+                            tts.speak(SuggestionsResult.get(autoSuggestionCounter),TextToSpeech.QUEUE_ADD,null,null);
+                        }
+                    }
+                }
+                else if(isspecialCharMode == true){
+                    alphabetCounter++;
+
+                    Log.d("Special character countSpecial character count", "data" + data.dy.getInt());
+                    if(alphabetCounter > 15){
+                        alphabetCounter = 0;
+                        specialCharacterCounter++;
+                        if (specialCharacterCounter < 0) {
+                            specialCharacterCounter = 0;
+                        }
+                        else if (specialCharacterCounter >= specialCharacters.length) {
+                            specialCharacterCounter = specialCharacters.length - 1;
+                        }
+                        else if (specialCharacterCounter == 8){
+                            specialCharacterCounter = 0;
+                        }
+
+                        Log.d("special character index value", "specialCharacterCounter" + specialCharacterCounter);
+                        String currentSpecialCharacter = String.valueOf(specialCharacters[specialCharacterCounter]);
+                        glAlphabetString = currentSpecialCharacter;
+                        System.out.println("FScrolling to: " + currentSpecialCharacter);
+                        System.out.println("FglNumberString: " + glAlphabetString);
+
+                        if(glAlphabetString.equals("#"))
+                        {
+                            tts.speak("Hash",TextToSpeech.QUEUE_FLUSH,null,null);
+                        }
+                        else if(glAlphabetString.equals("$"))
+                        {
+                            tts.speak("Dollar",TextToSpeech.QUEUE_FLUSH,null,null);
+                        }
+                        else {
+                            tts.speak(currentSpecialCharacter, TextToSpeech.QUEUE_FLUSH, null, null);
+                        }
                     }
                     else {
-                        tts.speak(SuggestionsResult.get(autoSuggestionCounter),TextToSpeech.QUEUE_ADD,null,null);
+                        System.out.println("special character didn't enter loop");
                     }
-
                 }
             }
-            else if (data.dy.getInt() < -3){ //backward scroll
+            else if (data.dy.getInt() < 1){ //backward scroll
                 inScrollMode = true;
                 if (isAlphabetModeActive == true) {
                     Log.d("indexfinger backward scroll - scroll through alphabets", "data" + data.dy.getInt());
 
                     alphabetCounter++;
-                    Log.d("alphabet counter val ", "alphabetCounter" + alphabetCounter);
+                    Log.d("Balphabet counter val ", "alphabetCounter" + alphabetCounter);
                     if (alphabetCounter > 15) {
                         alphabetCounter = 0;
                         alphabetIndex--;
@@ -785,6 +895,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                             glAlphabetString = currentAlphabet;
                             System.out.println("BScrolling to: " + currentAlphabet);
                             System.out.println("BglAlphabetString: " + glAlphabetString);
+
                             tts.speak(currentAlphabet, TextToSpeech.QUEUE_FLUSH, null, null);
                         }
                     } else {
@@ -796,7 +907,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
                     alphabetCounter++;
                     Log.d("Balphabet counter val ", "alphabetCounter" + alphabetCounter);
-                    if (alphabetCounter > 25) {
+                    if (alphabetCounter > 18) {
                         alphabetCounter = 0;
                         numberIndex--;
                         if (numberIndex == 0) {
@@ -815,19 +926,67 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                      else {
                         Log.i("Bmk do nothing", tapIdentifier);
                     }
-                } else if (isAutoSuggestionMode==true) {
-                    if (autoSuggestionCounter <= 0){
-                        autoSuggestionCounter = SuggestionsResult.size();
-                    } else{
-                        autoSuggestionCounter--;
-                        Log.d("Auto Suggestions Mode", "data" + data.dy.getInt());
-                    }
-                    tts.speak(SuggestionsResult.get(autoSuggestionCounter),TextToSpeech.QUEUE_ADD,null,null);
                 }
                 else if (isAutoSuggestionMode==true) {
-                                    Log.d("Auto Suggestions Mode", "data" + data.dy.getInt());
-                                    autoSuggestionsMode.backwardNavigateSuggestions(tts,SuggestionsResult);
-                                }                
+                    Log.d("Auto Suggestions Mode", "data" + data.dy.getInt());
+
+
+                    alphabetCounter++;
+
+                    Log.d("Auto Suggestions Mode", "data" + data.dy.getInt());
+                    //autoSuggestionsMode.forwardNavigateSuggestions(tts,SuggestionsResult);
+                    if(alphabetCounter > 10){
+                        autoSuggestionCounter--;
+                        alphabetCounter = 0;
+
+                        if (autoSuggestionCounter>=SuggestionsResult.size()){
+                            autoSuggestionCounter=0;
+                        }
+                        else {
+                            tts.speak(SuggestionsResult.get(autoSuggestionCounter),TextToSpeech.QUEUE_ADD,null,null);
+                        }
+                    }
+                }
+                else if(isspecialCharMode == true){
+                    alphabetCounter++;
+
+                    Log.d("Special character countSpecial character count", "data" + data.dy.getInt());
+                    if(alphabetCounter > 15){
+                        alphabetCounter = 0;
+                        specialCharacterCounter++;
+                        if (specialCharacterCounter < 0) {
+                            specialCharacterCounter = 0;
+                        }
+                        else if (specialCharacterCounter >= specialCharacters.length) {
+                            specialCharacterCounter = specialCharacters.length - 1;
+                        }
+                        else if (specialCharacterCounter == 8){
+                            specialCharacterCounter = 0;
+                        }
+
+                        Log.d("special character index value", "specialCharacterCounter" + specialCharacterCounter);
+                        String currentSpecialCharacter = String.valueOf(specialCharacters[specialCharacterCounter]);
+                        glAlphabetString = currentSpecialCharacter;
+                        System.out.println("FScrolling to: " + currentSpecialCharacter);
+                        System.out.println("FglNumberString: " + glAlphabetString);
+
+                        if(glAlphabetString.equals("#"))
+                        {
+                            tts.speak("Hash",TextToSpeech.QUEUE_FLUSH,null,null);
+                        }
+                        else if(glAlphabetString.equals("$"))
+                        {
+                            tts.speak("Dollar",TextToSpeech.QUEUE_FLUSH,null,null);
+                        }
+                        else
+                        {
+                            tts.speak(currentSpecialCharacter, TextToSpeech.QUEUE_FLUSH, null, null);
+                        }
+                    }
+                    else {
+                        System.out.println("special character didn't enter loop");
+                    }
+                }
             }
             else {
                 inScrollMode = false;
