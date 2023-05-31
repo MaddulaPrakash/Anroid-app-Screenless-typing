@@ -117,6 +117,13 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     static boolean isAlphabetModeActive = false;
     static boolean isNumberModeActive = false;
 
+    //Variables for edit Mode
+    static boolean isEditModeReplaceActive = false;
+    static boolean isEditModeInsertActive = false;
+    private int editModeIndex = 0;
+    private int editModeIndexBuffer = 0;
+    private int editStringLength = 0;
+
     public void CustomMouseListener(Tap tap) {
         this.tap = tap;
         this.tapData = new HashMap<>();
@@ -305,6 +312,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 isNumberModeActive = false;
                 isAutoSuggestionMode = false;
                 isspecialCharMode = false;
+                isEditModeReplaceActive=false;
+                isEditModeInsertActive=false;
 
                 // alMode.alModeForward(tts);
 
@@ -314,7 +323,14 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 selectingAlphabet = true;
                 Log.d("Alphabet selected ","data"+data);
 
-                retAlphabetString += glAlphabetString;
+                if(isEditModeReplaceActive == false & isEditModeInsertActive == false){
+                    retAlphabetString += glAlphabetString;
+                }
+                else if(isEditModeReplaceActive==true & isEditModeInsertActive == false){
+                    char[] charArray = retAlphabetString.toCharArray();
+                    charArray[editModeIndexBuffer] = glAlphabetString.charAt(0);
+                    retAlphabetString = charArray.toString();
+                }
 
                 System.out.println("glAlphabetString: " + glAlphabetString);
                 System.out.println("retAlphabetString: " + retAlphabetString);
@@ -396,6 +412,9 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
                 isspecialCharMode = false;
 
+                isEditModeReplaceActive=false;
+                isEditModeInsertActive=false;
+
 
                 //numberModeToggle=1;
                 //nmMode.nmModeInitialise();
@@ -406,7 +425,14 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 selectingAlphabet = true;
                 Log.d("Alphabet selected ","data"+data);
 
-                retAlphabetString += glAlphabetString;
+                if(isEditModeReplaceActive == false & isEditModeInsertActive == false){
+                    retAlphabetString += glAlphabetString;
+                }
+                else if(isEditModeReplaceActive==true & isEditModeInsertActive == false){
+                    char[] charArray = retAlphabetString.toCharArray();
+                    charArray[editModeIndexBuffer] = glAlphabetString.charAt(0);
+                    retAlphabetString = charArray.toString();
+                }
 
                 System.out.println("glAlphabetString: " + glAlphabetString);
                 System.out.println("retAlphabetString: " + retAlphabetString);
@@ -489,6 +515,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 isAlphabetModeActive = false;
                 isNumberMode = false;
                 isAutoSuggestionMode = false;
+                isEditModeReplaceActive=false;
+                isEditModeInsertActive=false;
 
                 //spModeToggle=1;
                 //specialCharMode.spModeInitialise();
@@ -499,7 +527,14 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 //selectingAlphabet = true;
                 Log.d("Special Character selected ","data"+data);
 
-                retAlphabetString += glAlphabetString;
+                if(isEditModeReplaceActive == false & isEditModeInsertActive == false){
+                    retAlphabetString += glAlphabetString;
+                }
+                else if(isEditModeReplaceActive==true & isEditModeInsertActive == false){
+                    char[] charArray = retAlphabetString.toCharArray();
+                    charArray[editModeIndexBuffer] = glAlphabetString.charAt(0);
+                    retAlphabetString = charArray.toString();
+                }
 
                 System.out.println("glAlphabetString: " + glAlphabetString);
                 System.out.println("retAlphabetString: " + retAlphabetString);
@@ -522,6 +557,30 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     tts.speak(glAlphabetString, TextToSpeech.QUEUE_FLUSH, null, null);
                     tts.setPitch(1.0f);
                 }
+            }
+            else if(isEditModeReplaceActive == false & data == 6){
+                tts.speak("Entered Edit Replace Mode",TextToSpeech.QUEUE_FLUSH,null,null);
+                Log.d("Entered Edit Replace Mode","data"+data);
+
+                isEditModeReplaceActive=true;
+                isEditModeInsertActive=false;
+                isspecialCharMode=false;
+                isAlphabetModeActive = false;
+                isNumberMode = false;
+                isAutoSuggestionMode = false;
+                editStringLength = retAlphabetString.length();
+            }
+            else if(isEditModeInsertActive == false & data ==12){
+                tts.speak("Entered Edit Insert Mode",TextToSpeech.QUEUE_FLUSH,null,null);
+                Log.d("Entered Edit Insert Mode","data"+data);
+
+                isEditModeReplaceActive=false;
+                isEditModeInsertActive=true;
+                isspecialCharMode=false;
+                isAlphabetModeActive = false;
+                isNumberMode = false;
+                isAutoSuggestionMode = false;
+                editStringLength = retAlphabetString.length();
             }
 
             /*
@@ -648,7 +707,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
              *   #####Autosuggestions Mode
              * */
 
-            else if(isNumberMode==false & isspecialCharMode==false & isAutoSuggestionMode==false & autoSuggestionModeToggle ==0 & data==14)
+            else if(isAutoSuggestionMode==false & data==14)
             {
                 isspecialCharMode=false;
                 isAlphabetModeActive = false;
@@ -692,7 +751,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
                 //countTotalTaps.performCounting("autoSuggestionModeForwardNav");
             }*/
-            else if(isNumberModeActive==false & isspecialCharMode==false & isAutoSuggestionMode==true & data==14)//Selection in AutoSuggestion Mode
+            else if(isAutoSuggestionMode==true & data==14)//Selection in AutoSuggestion Mode
             {
                 System.out.println("Auto suggestion mode selection");
                 String word = autoSuggestionsMode.selectAutoSuggestion(tts, autoSuggestionCounter);
@@ -745,7 +804,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
                     alphabetCounter++;
                     Log.d("Falphabet counter val ", "alphabetCounter" + alphabetCounter);
-                    if(alphabetCounter > 15){
+                    if(alphabetCounter > 18){
                         alphabetCounter = 0;
                         alphabetIndex++;
                         if (alphabetIndex < 0) {
@@ -825,7 +884,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     alphabetCounter++;
 
                     Log.d("Special character countSpecial character count", "data" + data.dy.getInt());
-                    if(alphabetCounter > 15){
+                    if(alphabetCounter > 5){
                         alphabetCounter = 0;
                         specialCharacterCounter++;
                         if (specialCharacterCounter < 0) {
@@ -860,15 +919,26 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         System.out.println("special character didn't enter loop");
                     }
                 }
+                else if(isEditModeReplaceActive==true){
+                    if (editModeIndex < 0 || editModeIndex >= editStringLength) {
+                        editModeIndex = 0;
+                    }
+                    Log.d("currentEditCharacter ", "editIndex" + editModeIndex);
+                    Character currentEditCharacter = retAlphabetString.charAt(editModeIndex);
+                    tts.speak(currentEditCharacter.toString(), TextToSpeech.QUEUE_FLUSH, null, null);
+                    editModeIndexBuffer = editModeIndex;
+                    editModeIndex++;
+                    Log.d("Edit Counter ", "editIndex" + editModeIndex);
+                }
             }
-            else if (data.dy.getInt() < 1){ //backward scroll
+            else if (data.dy.getInt() < -1){ //backward scroll
                 inScrollMode = true;
                 if (isAlphabetModeActive == true) {
                     Log.d("indexfinger backward scroll - scroll through alphabets", "data" + data.dy.getInt());
 
                     alphabetCounter++;
                     Log.d("Balphabet counter val ", "alphabetCounter" + alphabetCounter);
-                    if (alphabetCounter > 15) {
+                    if (alphabetCounter > 18) {
                         alphabetCounter = 0;
                         alphabetIndex--;
                         if (alphabetIndex == 0) {
@@ -981,6 +1051,19 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     }
                     else {
                         System.out.println("special character didn't enter loop");
+                    }
+                }
+                else if(isEditModeReplaceActive == true) {
+                    alphabetCounter++;
+                    if(alphabetCounter > 15){
+                        alphabetCounter = 0;
+                        if (editModeIndex < 0 || editModeIndex >= editStringLength) {
+                            editModeIndex = editStringLength-1;
+                        }
+                        Character currentEditCharacter = retAlphabetString.charAt(editModeIndex);
+                        tts.speak(currentEditCharacter.toString(), TextToSpeech.QUEUE_FLUSH, null, null);
+                        editModeIndexBuffer = editModeIndex;
+                        editModeIndex--;
                     }
                 }
             }
