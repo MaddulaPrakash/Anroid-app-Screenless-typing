@@ -1,4 +1,3 @@
-
 package com.example.charhoplayout;
 import static com.example.charhoplayout.EarconManager.deleteChar;
 
@@ -312,16 +311,19 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 isNumberModeActive = false;
                 isAutoSuggestionMode = false;
                 isspecialCharMode = false;
-                isEditModeReplaceActive=false;
-                isEditModeInsertActive=false;
+                //isEditModeReplaceActive=false;
+                //isEditModeInsertActive=false;
 
                 // alMode.alModeForward(tts);
 
                 //countTotalTaps.performCounting("alModeForward");
             }
             else if(isAlphabetModeActive == true & data == 2){
-                selectingAlphabet = true;
+                //selectingAlphabet = true;
                 Log.d("Alphabet selected ","data"+data);
+
+                /* retAlphabetString += glAlphabetString;*/
+
 
                 if(isEditModeReplaceActive == false & isEditModeInsertActive == false){
                     retAlphabetString += glAlphabetString;
@@ -412,8 +414,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
                 isspecialCharMode = false;
 
-                isEditModeReplaceActive=false;
-                isEditModeInsertActive=false;
+                //isEditModeReplaceActive=false;
+                //isEditModeInsertActive=false;
 
 
                 //numberModeToggle=1;
@@ -424,6 +426,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             else if(isNumberModeActive == true & data == 4){
                 selectingAlphabet = true;
                 Log.d("Alphabet selected ","data"+data);
+                /*retAlphabetString += glAlphabetString;*/
 
                 if(isEditModeReplaceActive == false & isEditModeInsertActive == false){
                     retAlphabetString += glAlphabetString;
@@ -515,8 +518,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 isAlphabetModeActive = false;
                 isNumberMode = false;
                 isAutoSuggestionMode = false;
-                isEditModeReplaceActive=false;
-                isEditModeInsertActive=false;
+                //isEditModeReplaceActive=false;
+                //isEditModeInsertActive=false;
 
                 //spModeToggle=1;
                 //specialCharMode.spModeInitialise();
@@ -526,6 +529,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             else if(isspecialCharMode == true & data == 8){
                 //selectingAlphabet = true;
                 Log.d("Special Character selected ","data"+data);
+                /*retAlphabetString += glAlphabetString;*/
 
                 if(isEditModeReplaceActive == false & isEditModeInsertActive == false){
                     retAlphabetString += glAlphabetString;
@@ -570,7 +574,12 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 isAutoSuggestionMode = false;
                 editStringLength = retAlphabetString.length();
             }
-            else if(isEditModeInsertActive == false & data ==12){
+            else if(isEditModeReplaceActive == true & data == 6){
+                isEditModeReplaceActive=false;/*TODO: Exit mode should automatically happen when user sets to a different mode. */
+                tts.speak("Exit Edit Replace Mode",TextToSpeech.QUEUE_FLUSH,null,null);
+                Log.d("Exit Edit Replace Mode","data"+data);
+            }
+            else if(isEditModeInsertActive == false & data == 12){
                 tts.speak("Entered Edit Insert Mode",TextToSpeech.QUEUE_FLUSH,null,null);
                 Log.d("Entered Edit Insert Mode","data"+data);
 
