@@ -329,9 +329,12 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     retAlphabetString += glAlphabetString;
                 }
                 else if(isEditModeReplaceActive==true & isEditModeInsertActive == false){
-                    char[] charArray = retAlphabetString.toCharArray();
+                    char[] charArray  = retAlphabetString.toCharArray();
+                    System.out.println("isEditModeReplaceActive true - charArray: " + Arrays.toString(charArray));
+                    System.out.println("isEditModeReplaceActive true - glAlphabetString 0: " + glAlphabetString.charAt(0));
+                    System.out.println("isEditModeReplaceActive true - charArray editModeIndexBuffer: " + charArray[editModeIndexBuffer]);
                     charArray[editModeIndexBuffer] = glAlphabetString.charAt(0);
-                    retAlphabetString = charArray.toString();
+                    retAlphabetString = new String(charArray);
                 }
 
                 System.out.println("glAlphabetString: " + glAlphabetString);
@@ -434,7 +437,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 else if(isEditModeReplaceActive==true & isEditModeInsertActive == false){
                     char[] charArray = retAlphabetString.toCharArray();
                     charArray[editModeIndexBuffer] = glAlphabetString.charAt(0);
-                    retAlphabetString = charArray.toString();
+                    retAlphabetString = new String(charArray);
                 }
 
                 System.out.println("glAlphabetString: " + glAlphabetString);
@@ -537,7 +540,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 else if(isEditModeReplaceActive==true & isEditModeInsertActive == false){
                     char[] charArray = retAlphabetString.toCharArray();
                     charArray[editModeIndexBuffer] = glAlphabetString.charAt(0);
-                    retAlphabetString = charArray.toString();
+                    retAlphabetString = new String(charArray);
                 }
 
                 System.out.println("glAlphabetString: " + glAlphabetString);
