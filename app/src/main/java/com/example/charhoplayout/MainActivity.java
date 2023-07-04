@@ -41,10 +41,6 @@ import java.util.concurrent.TimeUnit;
 public class MainActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
 
     private static final int MY_PERMISSIONS_REQUEST_BLUETOOTH_CONNECT = 1234;
-
-    static final int MOUSE_SPEED = 5; // adjust as needed
-
-    static final String OUTPUT_PREFIX = "key_input("; // the prefix of the output string for typing a letter
     /*
      * Static Variable Declaration
      * */
@@ -112,8 +108,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     String glAlphabetString = "";
     String retAlphabetString = "";
 
-    //private MouseManager mouseManager;
-    //static boolean isMouseModeActive = false;
     static boolean isAlphabetModeActive = false;
     static boolean isNumberModeActive = false;
 
@@ -205,9 +199,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
         AutoSuggestionsMode autoSuggestionsMode = new AutoSuggestionsMode();           // Instantiate AutoSuggestion Mode
 
-        //MouseListener mouseListener = new MouseListener();
-
-
         @Override
         public void onTapShiftSwitchReceived(String identifier, int shiftState) {
             // Implement your logic here
@@ -242,11 +233,9 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         public void onTapConnected(@NonNull String tapIdentifier) {
             tyString.typedStringInitialise();   // Initialise Typed String
 
-            alMode.speakOut(tts,"Tap Strap connected to the phone. You can start keyflow");   // SpeakOut once tapStrap connected to phone
+            /*Speak out once tap strap is connected to phone*/
+            alMode.speakOut(tts,"Tap Strap connected to the phone. You can start keyflow");
 
-            //alMode.alModeInitialise();      // Initialise Alphabet Mode
-            //nmMode.nmModeInitialise();      // Initialise Number Mode
-            //specialCharMode.spModeInitialise(); // Initialise Special Char Mode
 
             EarconManager earconManager = new EarconManager();
             earconManager.setupEarcons(MainActivity.tts,getApplicationContext().getPackageName());
@@ -277,26 +266,13 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
         }
 
-        /*
-        @Override
-        public void onControllerModeStarted(@NonNull String tapIdentifier) {
-
-        }
-
-        @Override
-        public void onTextModeStarted(@NonNull String tapIdentifier) {
-
-        }*/
 
         @Override
         public synchronized void onTapInputReceived(@NonNull String tapIdentifier, int data, int repetetion) {
             EarconManager earconManager = new EarconManager();
             earconManager.setupEarcons(MainActivity.tts,getApplicationContext().getPackageName());
 
-            Log.i("mktapinputreceived",tapIdentifier);
-            Log.d("scroll false","data"+data);
-            //inScrollMode = false;
-            //Log.i("isAlphabetModeActive value ", ((int) isAlphabetModeActive));
+            Log.d("onTapInputReceived","data"+data);
 
             /*
              *  ###########Alphabet Mode Coding Starts Here################
@@ -306,23 +282,13 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             if(!allowSearchScan & isAlphabetModeActive == false  & data==2)
             {
                 tts.speak("Entered Alphabet Mode",TextToSpeech.QUEUE_FLUSH,null,null);
-                //alMode.alModeInitialise();
                 isAlphabetModeActive = true;
                 isNumberModeActive = false;
                 isAutoSuggestionMode = false;
                 isspecialCharMode = false;
-                //isEditModeReplaceActive=false;
-                //isEditModeInsertActive=false;
-
-                // alMode.alModeForward(tts);
-
-                //countTotalTaps.performCounting("alModeForward");
             }
             else if(isAlphabetModeActive == true & data == 2){
-                //selectingAlphabet = true;
                 Log.d("Alphabet selected ","data"+data);
-
-                /* retAlphabetString += glAlphabetString;*/
 
 
                 if(isEditModeReplaceActive == false & isEditModeInsertActive == false){
@@ -363,7 +329,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     tts.setPitch(1.0f);
                 }
 
-                // need to store alphabet in a string array
             }
             // alMode -> SpeakOut
             else if(data ==30)
@@ -371,7 +336,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 System.out.println("retAlphabetString: data is " + data);
                 System.out.println("retAlphabetString: " + retAlphabetString);
                 tts.setPitch(1.5f);
-                //tts.speak(retAlphabetString,TextToSpeech.QUEUE_FLUSH,null,null);
                 if (retAlphabetString.length()==0) {
                     tts.speak("No message typed", TextToSpeech.QUEUE_FLUSH, null, null);
                 }
@@ -380,9 +344,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     tts.speak(retAlphabetString, TextToSpeech.QUEUE_FLUSH, null, null);
                 }
                 tts.setPitch(1.0f);
-                //alMode.alModeSpeakOut(tts,tyString.alreadyTyped);
-
-                //countTotalTaps.performCounting("alModeSpeakOut");
             }
             // alMode ->Deletion
             else if(data==24)
@@ -426,20 +387,10 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 isAutoSuggestionMode=false;
 
                 isspecialCharMode = false;
-
-                //isEditModeReplaceActive=false;
-                //isEditModeInsertActive=false;
-
-
-                //numberModeToggle=1;
-                //nmMode.nmModeInitialise();
-
-                //countTotalTaps.performCounting("nmModeEnter");
             }
             else if(isNumberModeActive == true & data == 4){
                 selectingAlphabet = true;
                 Log.d("Number  selected ","data"+data);
-                /*retAlphabetString += glAlphabetString;*/
                 System.out.println("isEditModeReplaceActive val: " + isEditModeReplaceActive);
 
                 if(isEditModeReplaceActive == false & isEditModeInsertActive == false){
@@ -452,6 +403,15 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     charArray[editModeIndexBuffer] = glAlphabetString.charAt(0);
                     retAlphabetString = new String(charArray);
                 }
+                else if(isEditModeReplaceActive==false & isEditModeInsertActive == true& !retAlphabetString.isEmpty()){
+                    System.out.println("isEditModeInsertActive true - glAlphabetString 0: " + glAlphabetString.charAt(0));
+                    System.out.println("isEditModeInsertActive true - editModeIndexBuffer  " + editModeIndexBuffer);
+
+                    StringBuilder sb = new StringBuilder(retAlphabetString);
+                    sb.insert(++editModeIndexBuffer,glAlphabetString.charAt(0));
+                    retAlphabetString = sb.toString();
+                    Log.i("isEditModeInsertActive Word",retAlphabetString);
+                }
 
                 System.out.println("glAlphabetString: " + glAlphabetString);
                 System.out.println("retAlphabetString: " + retAlphabetString);
@@ -462,63 +422,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
                 // need to store alphabet in a string array
             }
-            /*
-            //nmMode -> Exit
-            else if(!allowSearchScan & isNumberMode==true & numberModeToggle==1 & isspecialCharMode==false & isAutoSuggestionMode==false & data==3) // nmMode -> Exit
-            {
-                tts.speak("Exit Number Mode",TextToSpeech.QUEUE_FLUSH,null,null);
-                isNumberMode=false;
-                numberModeToggle=0;
-                nmMode.numberHeadPoint = 0;
-
-                countTotalTaps.performCounting("nmModeExit");
-            }
-            // nmMode -> Forward
-            else if(!allowSearchScan & isNumberMode==true & numberModeToggle==1 & isspecialCharMode==false & isAutoSuggestionMode==false & data==2)
-            {
-                nmMode.nmModeForward(tts);
-
-                countTotalTaps.performCounting("nmModeForward");
-            }
-            // nmMode -> Backward
-            else if(!allowSearchScan & isNumberMode==true & numberModeToggle==1 & isspecialCharMode==false & isAutoSuggestionMode==false & data==4)
-            {
-                nmMode.nmModeBackward(tts);
-
-                countTotalTaps.performCounting("nmModeBackward");
-            }
-            */
-             /*
-            // nmMode -> Selection
-            else if(!allowSearchScan & isNumberMode==true & numberModeToggle==1 & isspecialCharMode==false & isAutoSuggestionMode==false & data==1)
-            {
-                String results;
-                results = nmMode.nmModeSelection(tts,tyString.alreadyTyped/*,tyString.word);
-                tyString.alreadyTyped = results;
-
-                Log.d("TypedString",tyString.alreadyTyped);
-
-                countTotalTaps.performCounting("nmModeSelection");
-            }
-            // nmMode -> Delete
-            else if(!allowSearchScan & isNumberMode==true & numberModeToggle==1 & isspecialCharMode==false & isAutoSuggestionMode==false & data==16)
-            {
-                String results;
-                results = nmMode.nmModeDeletion(tts,tyString.alreadyTyped/*,tyString.word);
-                tyString.alreadyTyped = results;
-
-                Log.d("TypedString",tyString.alreadyTyped);
-
-                countTotalTaps.performCounting("nmModeDeletion");
-            }
-            //nmMode -> Speakout
-            else if(!allowSearchScan & isNumberMode==true & numberModeToggle==1 & isspecialCharMode==false & isAutoSuggestionMode==false & data==30)
-            {
-                nmMode.nmModeSpeakOut(tts,tyString.alreadyTyped);
-
-                countTotalTaps.performCounting("nmModeSpeakOut");
-            }
-
             /*
              *  ###########Special Characters Mode Coding Starts Here###################
              * */
@@ -534,18 +437,9 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 isAlphabetModeActive = false;
                 isNumberMode = false;
                 isAutoSuggestionMode = false;
-                //isEditModeReplaceActive=false;
-                //isEditModeInsertActive=false;
-
-                //spModeToggle=1;
-                //specialCharMode.spModeInitialise();
-
-                //countTotalTaps.performCounting("specialCharModeEnter");
             }
             else if(isspecialCharMode == true & data == 8){
-                //selectingAlphabet = true;
                 Log.d("Special Character selected ","data"+data);
-                /*retAlphabetString += glAlphabetString;*/
 
                 if(isEditModeReplaceActive == false & isEditModeInsertActive == false){
                     retAlphabetString += glAlphabetString;
@@ -554,6 +448,15 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     char[] charArray = retAlphabetString.toCharArray();
                     charArray[editModeIndexBuffer] = glAlphabetString.charAt(0);
                     retAlphabetString = new String(charArray);
+                }
+                else if(isEditModeReplaceActive==false & isEditModeInsertActive == true& !retAlphabetString.isEmpty()){
+                    System.out.println("isEditModeInsertActive true - glAlphabetString 0: " + glAlphabetString.charAt(0));
+                    System.out.println("isEditModeInsertActive true - editModeIndexBuffer  " + editModeIndexBuffer);
+
+                    StringBuilder sb = new StringBuilder(retAlphabetString);
+                    sb.insert(++editModeIndexBuffer,glAlphabetString.charAt(0));
+                    retAlphabetString = sb.toString();
+                    Log.i("isEditModeInsertActive Word",retAlphabetString);
                 }
 
                 System.out.println("glAlphabetString: " + glAlphabetString);
@@ -614,126 +517,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             }
 
             /*
-            // spMode -> Exit
-            else if(!allowSearchScan & isNumberMode==false & numberModeToggle==0 & isspecialCharMode==true & spModeToggle==1  & isAutoSuggestionMode==false & data==5)
-            {
-                tts.speak("Exit Special Characters Mode",TextToSpeech.QUEUE_FLUSH,null,null);
-                isspecialCharMode=false;
-                spModeToggle=0;
-                specialCharMode.spHeadPoint=0;
-
-                countTotalTaps.performCounting("specialCharModeExit");
-            }
-            // spMode -> Forward
-            else if(!allowSearchScan & isNumberMode==false & numberModeToggle==0 & isspecialCharMode==true & spModeToggle==1 & isAutoSuggestionMode==false & data==2)
-            {
-                specialCharMode.spModeForward(tts);
-
-                countTotalTaps.performCounting("specialCharModeForward");
-            }
-            // spMode -> Backward
-            else if(!allowSearchScan & isNumberMode==false & numberModeToggle==0 & isspecialCharMode==true & spModeToggle==1 & isAutoSuggestionMode==false & data==4)
-            {
-                specialCharMode.spModeBackward(tts);
-
-                countTotalTaps.performCounting("specialCharModeBackward");
-            }
-            // spMode -> Selection
-            else if(!allowSearchScan & isNumberMode==false & numberModeToggle==0 & isspecialCharMode==true & spModeToggle==1 & isAutoSuggestionMode==false & data==1)
-            {
-                String results;
-                results = specialCharMode.spModeSelection(tts,tyString.alreadyTyped/*,tyString.word);
-                tyString.alreadyTyped = results;
-
-                Log.d("TypedString",tyString.alreadyTyped);
-
-                countTotalTaps.performCounting("specialCharModeSelection");
-            }
-            // spMode -> Deletion
-            else if(!allowSearchScan & isNumberMode==false & numberModeToggle==0 & isspecialCharMode==true & spModeToggle==1 & isAutoSuggestionMode==false & data==16)
-            {
-                String results;
-                results = specialCharMode.spModeDeletion(tts,tyString.alreadyTyped/*,tyString.word);
-                tyString.alreadyTyped = results;
-
-                Log.d("TypedString",tyString.alreadyTyped);
-
-                countTotalTaps.performCounting("specialCharModeDeletion");
-            }
-            //spMode -> Speakout
-            else if (!allowSearchScan & isNumberMode==false & numberModeToggle==0 & isspecialCharMode==true & spModeToggle==1 & isAutoSuggestionMode==false & data==30)
-            {
-                specialCharMode.spModeSpeakOut(tts,tyString.alreadyTyped);
-
-                countTotalTaps.performCounting("specialCharModeSpeakOut");
-            }
-
-            /*
-             *  ###########Edit Mode Coding Starts Here##########################
-             * */
-
-            /*
-            //Index + Middle + Ring Finger ==> Enter In Edit Mode
-            else if(!allowSearchScan & isNumberMode==false & isspecialCharMode==false & isAutoSuggestionMode==false & data== 14 & toggle==0)
-            {
-                //edMode.edModeInitialise(tts,tyString.alreadyTyped,getApplicationContext());
-
-                Log.d("TypedString",tyString.alreadyTyped);
-
-                countTotalTaps.performCounting("editModeEnter");
-            }
-            //Index + Middle + Ring ==> Exit Edit Mode
-            else if(/*allowSearchScan==true &*/ /*isNumberMode==false & isspecialCharMode==false & isAutoSuggestionMode==false & data== 14 & toggle==1 & EditMode.editMode)
-            {
-                //tts.speak("Exit Edit Mode ",TextToSpeech.QUEUE_FLUSH,null,null);
-                toggle=0;
-                allowSearchScan=false;
-                EditMode.editMode=false;
-
-                countTotalTaps.performCounting("editModeExit");
-            }
-            //Index Finger to Navigate in Selected Word
-            else if(allowSearchScan & isNumberMode==false & isspecialCharMode==false & isAutoSuggestionMode==false &  data == 2)
-            {
-                //edMode.edModeForwardNav(tts,tyString.alreadyTyped);
-
-                countTotalTaps.performCounting("editModeForwardNav");
-            }
-            else if(allowSearchScan & isNumberMode==false & isspecialCharMode==false & isAutoSuggestionMode==false &  data == 4)
-            {
-                //edMode.edModeBackwardNav(tts,tyString.alreadyTyped);
-
-                countTotalTaps.performCounting("editModeBackwardNav");
-            }
-            //RIng Finger for Decision Making
-            else if(allowSearchScan & isNumberMode==false & isspecialCharMode==false & isAutoSuggestionMode==false & data==8)
-            {
-                //edMode.edModeDecisionNav(tts);
-
-                countTotalTaps.performCounting("editModeDecisionNav");
-            }
-            // Decision Selection in Edit Mode
-            else if(allowSearchScan & isNumberMode==false & isspecialCharMode==false & isAutoSuggestionMode==false & data ==1)
-            {
-                //edMode.edModeDecisionSelection(tts,tyString.alreadyTyped);
-
-                countTotalTaps.performCounting("editModeDecisionSelection");
-            }
-            //Deletion in Edit Mode allowSearch Scan
-            else if(allowSearchScan & isNumberMode==false & isspecialCharMode==false & isAutoSuggestionMode==false & data==16)
-            {
-                //tyString.alreadyTyped = edMode.edModeDeletion(tts,tyString.alreadyTyped);
-
-                countTotalTaps.performCounting("editModeDeletion");
-            }
-            //SpeakOut in EditMode
-            else if(allowSearchScan & isNumberMode==false & isspecialCharMode==false & isAutoSuggestionMode==false & data==30)
-            {
-                edMode.edModeSpeakOut(tts,tyString.alreadyTyped);
-
-                countTotalTaps.performCounting("editModeSpeakOut");
-            }
-            /*
              *   #####Autosuggestions Mode
              * */
 
@@ -764,23 +547,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         System.out.println("isAutoSuggestionMode SuggestionsResult is null");
                     }
                 }
-
-                //countTotalTaps.performCounting("autoSuggestionModeFetch");
-            }/*
-            else if(!allowSearchScan & isNumberModeActive==false & numberModeToggle==0 & isspecialCharMode==false & isAutoSuggestionMode==true & autoSuggestionModeToggle ==1 & data==14)
-            {
-                tts.speak("Exit AutoSuggestions Mode ",TextToSpeech.QUEUE_FLUSH,null,null);
-                isAutoSuggestionMode=false;
-                autoSuggestionModeToggle=0;
-
-                countTotalTaps.performCounting("autoSuggestionModeExit");
             }
-            else if(!allowSearchScan & isNumberModeActive==false & numberModeToggle==0 & isspecialCharMode==false & isAutoSuggestionMode==true & autoSuggestionModeToggle ==1 & data==2) // Forward Navigation in AutoSuggestion Mode
-            {
-                autoSuggestionsMode.forwardNavigateSuggestions(tts,SuggestionsResult);
-
-                //countTotalTaps.performCounting("autoSuggestionModeForwardNav");
-            }*/
             else if(isAutoSuggestionMode==true & data==14)//Selection in AutoSuggestion Mode
             {
                 System.out.println("Auto suggestion mode selection");
@@ -808,26 +575,19 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 }
 
                 Log.d("TypedString",retAlphabetString );
-
-                //countTotalTaps.performCounting("autoSuggestionModeSelection");
             }
         }
 
         @Override
         public synchronized void onMouseInputReceived(@NonNull String tapIdentifier, @NonNull MousePacket data) {
 
-            Log.i("mkonMouseInputReceived",tapIdentifier);
             Log.d("mkMYINT","data"+data);
             Log.d("mkmousedx","data"+data.dx.getInt());
             Log.d("mkmousedy","data"+data.dy.getInt());
-            Log.d("mkmousedt","data"+data.dt.getInt());
             Log.d("mkmouseproximity","data"+data.proximity.getInt());
-            //log(tapIdentifier+"mkmouseinputreceived"+data.dx.getInt()+","+data.dy.getInt());
-            //log(tapIdentifier+"mkmouseinputreceived"+data.dx.getInt()+","+data.dy.getInt());
 
             if (data.dy.getInt() > 1 ) { //forward scroll
                 inScrollMode = true;
-                //tts.speak(" Alphabets scroll mode", TextToSpeech.QUEUE_FLUSH, null, null);
 
                 if (isAlphabetModeActive == true) {
                     Log.d("indexfinger forward scroll - scroll through alphabets", "data" + data.dy.getInt());
@@ -844,7 +604,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         }
                         if (alphabetIndex == 27) {
                             Log.d("Fspeak out space ", "alphabetIndex" + alphabetIndex);
-                            //Log.d("alphabet index value", "alphabetIndex" + alphabetIndex);
                             String currentAlphabet = String.valueOf(alphabet[alphabetIndex]);
                             glAlphabetString = currentAlphabet;
                             System.out.println("FScrolling to: " + currentAlphabet);
@@ -934,7 +693,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     }
                 } else if (isEditModeReplaceActive == true || isEditModeInsertActive == true) {
                     alphabetCounter++;
-                    if (alphabetCounter > 7) {
+                    if (alphabetCounter > 15) {
                         if (editModeIndex < 0 || editModeIndex >= editStringLength) {
                             editModeIndex = 0;
                         }
@@ -965,7 +724,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
                         if (alphabetIndex == 27) {
                             Log.d("Bspeak out space ", "alphabetIndex" + alphabetIndex);
-                            //Log.d("alphabet index value", "alphabetIndex" + alphabetIndex);
                             String currentAlphabet = String.valueOf(alphabet[alphabetIndex]);
                             glAlphabetString = currentAlphabet;
                             System.out.println("Scrolling to: " + currentAlphabet);
@@ -1016,7 +774,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     alphabetCounter++;
 
                     Log.d("Auto Suggestions Mode", "data" + data.dy.getInt());
-                    //autoSuggestionsMode.forwardNavigateSuggestions(tts,SuggestionsResult);
                     if(alphabetCounter > 10){
                         autoSuggestionCounter--;
                         alphabetCounter = 0;
@@ -1069,7 +826,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         System.out.println("special character didn't enter loop");
                     }
                 }
-                else if(isEditModeReplaceActive == true) {
+                else if(isEditModeReplaceActive == true || isEditModeInsertActive == true) {
                     alphabetCounter++;
                     if(alphabetCounter > 15){
                         alphabetCounter = 0;
