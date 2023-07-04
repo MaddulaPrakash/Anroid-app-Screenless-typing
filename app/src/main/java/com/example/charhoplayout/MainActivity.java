@@ -693,7 +693,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     }
                 } else if (isEditModeReplaceActive == true || isEditModeInsertActive == true) {
                     alphabetCounter++;
-                    if (alphabetCounter > 15) {
+                    if (alphabetCounter > 20) {
                         if (editModeIndex < 0 || editModeIndex >= editStringLength) {
                             editModeIndex = 0;
                         }
@@ -828,7 +828,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 }
                 else if(isEditModeReplaceActive == true || isEditModeInsertActive == true) {
                     alphabetCounter++;
-                    if(alphabetCounter > 15){
+                    if(alphabetCounter > 20){
                         alphabetCounter = 0;
                         if (editModeIndex < 0 || editModeIndex >= editStringLength) {
                             editModeIndex = editStringLength-1;
