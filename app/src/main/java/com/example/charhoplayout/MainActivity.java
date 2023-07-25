@@ -90,11 +90,17 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     private boolean inAlphabetMode = false;
     private boolean inNumberMode = false;
     private char[] alphabet = " abcdefghijklmnopqrstuvwxyz ".toCharArray();
-    private char[] number = " 0123456789".toCharArray();
 
-    private char[] specialCharacters = "&.@!*#$%?".toCharArray();
+    private String alphabetString = " abcdefghijklmnopqrstuvwxyz ";
+    private char[] number = " 0123456789 ".toCharArray();
+
+    private char[] specialCharacters = " &.@!*#$%? ".toCharArray();
     int alphabetIndex = 0;
     int numberIndex = 0;
+
+    int globalEditIndex = 0;
+
+    int deleteModeIndex = 0;
 
     private int alphabetCounter = 0;
     private int numberCounter = 0;
@@ -114,6 +120,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     //Variables for edit Mode
     static boolean isEditModeReplaceActive = false;
     static boolean isEditModeInsertActive = false;
+
+    static boolean isDeletionModeActive = false;
     private int editModeIndex = 0;
     private int editModeIndexBuffer = 0;
     private int editStringLength = 0;
@@ -286,6 +294,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 isNumberModeActive = false;
                 isAutoSuggestionMode = false;
                 isspecialCharMode = false;
+                isDeletionModeActive = false;
             }
             else if(isAlphabetModeActive == true & data == 2){
                 Log.d("Alphabet selected ","data"+data);
@@ -302,6 +311,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     System.out.println("isEditModeReplaceActive true - charArray editModeIndexBuffer: " + charArray[editModeIndexBuffer]);
                     charArray[editModeIndexBuffer] = glAlphabetString.charAt(0);
                     retAlphabetString = new String(charArray);
+                    isAlphabetModeActive = false;
                 }
                 else if(isEditModeReplaceActive==false & isEditModeInsertActive == true& !retAlphabetString.isEmpty()){
                     System.out.println("isEditModeInsertActive true - glAlphabetString 0: " + glAlphabetString.charAt(0));
@@ -311,6 +321,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     sb.insert(++editModeIndexBuffer,glAlphabetString.charAt(0));
                     retAlphabetString = sb.toString();
                     Log.i("isEditModeInsertActive Word",retAlphabetString);
+                    isAlphabetModeActive = false;
                 }
 
                 System.out.println("glAlphabetString: " + glAlphabetString);
@@ -346,14 +357,28 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 tts.setPitch(1.0f);
             }
             // alMode ->Deletion
-            else if(data == 24 | data == 16)
+            else if(isDeletionModeActive == false & (data == 24 | data == 16))
             {
+                Log.d("Delete mode entered","data"+data);
+
+                isDeletionModeActive = true;
+
+                isNumberModeActive = false;
+
+                isAlphabetModeActive = false;
+
+                isAutoSuggestionMode=false;
+
+                isspecialCharMode = false;
+
                 String deleted_alphabet = String.valueOf(retAlphabetString.charAt(retAlphabetString.length() - 1));
                 System.out.println(" Deletion retAlphabetString: " + retAlphabetString);
                 //tts.speak(deleted_alphabet,TextToSpeech.QUEUE_ADD,null,null);
-                tts.speak(deleted_alphabet+"", TextToSpeech.QUEUE_ADD, null, null);
-                retAlphabetString = retAlphabetString.substring(0, retAlphabetString.length() - 1);
-                tts.playEarcon(deleteChar,TextToSpeech.QUEUE_FLUSH,null,null);
+                tts.speak("delete at "+ deleted_alphabet.toString(), TextToSpeech.QUEUE_ADD, null, null);
+
+                deleteModeIndex = retAlphabetString.length() - 1;
+                //retAlphabetString = retAlphabetString.substring(0, retAlphabetString.length() - 1);
+                //tts.playEarcon(deleteChar,TextToSpeech.QUEUE_FLUSH,null,null);
 
                 //retAlphabetString = retAlphabetString.substring(0, retAlphabetString.length() - 1);
                 //System.out.println(" Deletion retAlphabetString: " + retAlphabetString);
@@ -368,6 +393,14 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 countTotalTaps.performCounting("alMOdeDeletion");
                */
             }
+            else if(isDeletionModeActive == true & (data == 24 | data == 16)){
+                Log.d("Delete mode entered isDeletionModeActive true","data"+data);
+
+                retAlphabetString = retAlphabetString.substring(0, deleteModeIndex);//check if this works for deletion of string in the middle
+                tts.playEarcon(deleteChar,TextToSpeech.QUEUE_FLUSH,null,null);
+
+                System.out.println(" Deletion retAlphabetString: " + retAlphabetString);
+            }
             /*
              *  ###########Number Mode Coding Starts Here####################
              * */
@@ -380,20 +413,22 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
                 Log.d("Number mode entered","data"+data);
 
-                isNumberModeActive = true;
+                isNumberModeActive = true;     
 
                 isAlphabetModeActive = false;
 
                 isAutoSuggestionMode=false;
 
                 isspecialCharMode = false;
+
+                isDeletionModeActive = false;
             }
             else if(isNumberModeActive == true & data == 4){
                 selectingAlphabet = true;
                 Log.d("Number  selected ","data"+data);
                 System.out.println("isEditModeReplaceActive val: " + isEditModeReplaceActive);
 
-                if(isEditModeReplaceActive == false & isEditModeInsertActive == false){
+                if(isEditModeReplaceActive == false & isEditModeInsertActive == false){  
                     System.out.println("isEditModeReplaceActive false: " + glAlphabetString);
                     retAlphabetString += glAlphabetString;
                 }
@@ -416,9 +451,18 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 System.out.println("glAlphabetString: " + glAlphabetString);
                 System.out.println("retAlphabetString: " + retAlphabetString);
 
-                tts.setPitch(1.5f);
-                tts.speak(glAlphabetString, TextToSpeech.QUEUE_FLUSH, null, null);
-                tts.setPitch(1.0f);
+                if(glAlphabetString.equals(" ") ) {
+                    tts.setPitch(1.5f);
+                    tts.speak("space", TextToSpeech.QUEUE_FLUSH, null, null);
+                    Log.d("selection speak out space ", "alphabetIndex" + alphabetIndex);
+                    tts.setPitch(1.0f);
+                }
+                else {
+                    System.out.println("glAlphabetString is not space " + glAlphabetString);
+                    tts.setPitch(1.5f);
+                    tts.speak(glAlphabetString, TextToSpeech.QUEUE_FLUSH, null, null);
+                    tts.setPitch(1.0f);
+                }
 
                 // need to store alphabet in a string array
             }
@@ -437,6 +481,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 isAlphabetModeActive = false;
                 isNumberModeActive = false;
                 isAutoSuggestionMode = false;
+                isDeletionModeActive = false;
             }
             else if(isspecialCharMode == true & data == 8){
                 Log.d("Special Character selected ","data"+data);
@@ -474,8 +519,15 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     tts.speak("Dollar",TextToSpeech.QUEUE_FLUSH,null,null);
                     tts.setPitch(1.0f);
                 }
+                else if(glAlphabetString.equals(" ") ) {
+                    tts.setPitch(1.5f);
+                    tts.speak("space", TextToSpeech.QUEUE_FLUSH, null, null);
+                    Log.d("selection speak out space ", "alphabetIndex" + alphabetIndex);
+                    tts.setPitch(1.0f);
+                }
                 else
                 {
+                    System.out.println("glAlphabetString is not space " + glAlphabetString);
                     tts.setPitch(1.5f);
                     tts.speak(glAlphabetString, TextToSpeech.QUEUE_FLUSH, null, null);
                     tts.setPitch(1.0f);
@@ -491,6 +543,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 isAlphabetModeActive = false;
                 isNumberModeActive = false;
                 isAutoSuggestionMode = false;
+                isDeletionModeActive = false;
                 editStringLength = retAlphabetString.length();
             }
             else if(isEditModeReplaceActive == true & data == 6){
@@ -508,6 +561,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 isAlphabetModeActive = false;
                 isNumberModeActive = false;
                 isAutoSuggestionMode = false;
+                isDeletionModeActive = false;
                 editStringLength = retAlphabetString.length();
             }
             else if(isEditModeInsertActive == true & data == 12){
@@ -526,6 +580,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 isAlphabetModeActive = false;
                 isNumberModeActive = false;
                 isAutoSuggestionMode = true;
+                isDeletionModeActive = false;
 
                 if (retAlphabetString.length() == 0)
                 {
@@ -581,12 +636,12 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         @Override
         public synchronized void onMouseInputReceived(@NonNull String tapIdentifier, @NonNull MousePacket data) {
 
-            Log.d("mkMYINT","data"+data);
-            Log.d("mkmousedx","data"+data.dx.getInt());
-            Log.d("mkmousedy","data"+data.dy.getInt());
-            Log.d("mkmouseproximity","data"+data.proximity.getInt());
+            Log.d("mkMYINT", "data" + data);
+            Log.d("mkmousedx", "data" + data.dx.getInt());
+            Log.d("mkmousedy", "data" + data.dy.getInt());
+            Log.d("mkmouseproximity", "data" + data.proximity.getInt());
 
-            if (data.dy.getInt() > 1 ) { //forward scroll
+            if (data.dy.getInt() > 1) { //forward scroll
                 inScrollMode = true;
 
                 if (isAlphabetModeActive == true) {
@@ -595,30 +650,57 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     alphabetCounter++;
                     Log.d("Falphabet counter val ", "alphabetCounter" + alphabetCounter);
                     if (alphabetCounter > 18) {
-                        alphabetCounter = 0;
-                        alphabetIndex++;
-                        if (alphabetIndex < 0) {
-                            alphabetIndex = 0;
-                        } else if (alphabetIndex >= alphabet.length) {
-                            alphabetIndex = alphabet.length - 1;
+                        if (isEditModeReplaceActive == true) {
+                            globalEditIndex++;
+                            if (globalEditIndex < 0) {
+                                globalEditIndex = 0;
+                            } else if (globalEditIndex >= alphabet.length) {
+                                globalEditIndex = alphabet.length - 1;
+                            }
+                            if (globalEditIndex == 27) {
+                                Log.d("Fspeak out space ", "alphabetIndex" + globalEditIndex);
+                                String currentAlphabet = String.valueOf(alphabet[globalEditIndex]);
+                                glAlphabetString = currentAlphabet;
+                                System.out.println("FScrolling to: " + currentAlphabet);
+                                tts.setSpeechRate(1.5f);
+                                tts.speak("space", TextToSpeech.QUEUE_FLUSH, null, null);
+                                alphabetIndex = 0;//reset the position
+                            } else {
+                                Log.d("Falphabet index value", "alphabetIndex" + globalEditIndex);
+                                String currentAlphabet = String.valueOf(alphabet[globalEditIndex]);
+                                glAlphabetString = currentAlphabet;
+                                System.out.println("FScrolling to: " + currentAlphabet);
+                                System.out.println("FglAlphabetString: " + glAlphabetString);
+                                tts.setSpeechRate(1.5f);
+                                tts.speak(currentAlphabet, TextToSpeech.QUEUE_FLUSH, null, null);
+                            }
                         }
-                        if (alphabetIndex == 27) {
-                            Log.d("Fspeak out space ", "alphabetIndex" + alphabetIndex);
-                            String currentAlphabet = String.valueOf(alphabet[alphabetIndex]);
-                            glAlphabetString = currentAlphabet;
-                            System.out.println("FScrolling to: " + currentAlphabet);
-                            tts.setSpeechRate(1.5f);
-                            tts.speak("space", TextToSpeech.QUEUE_FLUSH, null, null);
-                            alphabetIndex = 0;//reset the position
-                        } else {
-                            Log.d("Falphabet index value", "alphabetIndex" + alphabetIndex);
-                            String currentAlphabet = String.valueOf(alphabet[alphabetIndex]);
-                            glAlphabetString = currentAlphabet;
-                            System.out.println("FScrolling to: " + currentAlphabet);
-                            System.out.println("FglAlphabetString: " + glAlphabetString);
-                            tts.setSpeechRate(1.5f);
-                            tts.speak(currentAlphabet, TextToSpeech.QUEUE_FLUSH, null, null);
-                        }
+                        else{
+                            alphabetCounter = 0;
+                            alphabetIndex++;
+                            if (alphabetIndex < 0) {
+                                alphabetIndex = 0;
+                            } else if (alphabetIndex >= alphabet.length) {
+                                alphabetIndex = alphabet.length - 1;
+                            }
+                            if (alphabetIndex == 27) {
+                                Log.d("Fspeak out space ", "alphabetIndex" + alphabetIndex);
+                                String currentAlphabet = String.valueOf(alphabet[alphabetIndex]);
+                                glAlphabetString = currentAlphabet;
+                                System.out.println("FScrolling to: " + currentAlphabet);
+                                tts.setSpeechRate(1.5f);
+                                tts.speak("space", TextToSpeech.QUEUE_FLUSH, null, null);
+                                alphabetIndex = 0;//reset the position
+                            } else {
+                                Log.d("Falphabet index value", "alphabetIndex" + alphabetIndex);
+                                String currentAlphabet = String.valueOf(alphabet[alphabetIndex]);
+                                glAlphabetString = currentAlphabet;
+                                System.out.println("FScrolling to: " + currentAlphabet);
+                                System.out.println("FglAlphabetString: " + glAlphabetString);
+                                tts.setSpeechRate(1.5f);
+                                tts.speak(currentAlphabet, TextToSpeech.QUEUE_FLUSH, null, null);
+                            }
+                       }
                     } else {
                         Log.i("Fmk do nothing", tapIdentifier);
                     }
@@ -634,8 +716,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                             numberIndex = 0;
                         } else if (numberIndex >= number.length) {
                             numberIndex = number.length - 1;
-                        } else if (numberIndex == 10) {
-                            numberIndex = 0;
                         }
 
                         Log.d("Fnumber index value", "numberIndex" + numberIndex);
@@ -644,13 +724,15 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         System.out.println("FScrolling to: " + currentNumber);
                         System.out.println("FglNumberString: " + glAlphabetString);
                         tts.speak(currentNumber, TextToSpeech.QUEUE_FLUSH, null, null);
+
+
                     }
                 } else if (isAutoSuggestionMode == true) {
                     alphabetCounter++;
 
                     Log.d("Auto Suggestions Mode", "data" + data.dy.getInt());
                     //autoSuggestionsMode.forwardNavigateSuggestions(tts,SuggestionsResult);
-                    if (alphabetCounter > 10) {
+                    if (alphabetCounter > 16) {
                         autoSuggestionCounter++;
                         alphabetCounter = 0;
 
@@ -671,9 +753,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                             specialCharacterCounter = 0;
                         } else if (specialCharacterCounter >= specialCharacters.length) {
                             specialCharacterCounter = specialCharacters.length - 1;
-                        } else if (specialCharacterCounter == 8) {
-                            specialCharacterCounter = 0;
                         }
+
 
                         Log.d("special character index value", "specialCharacterCounter" + specialCharacterCounter);
                         String currentSpecialCharacter = String.valueOf(specialCharacters[specialCharacterCounter]);
@@ -688,10 +769,11 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         } else {
                             tts.speak(currentSpecialCharacter, TextToSpeech.QUEUE_FLUSH, null, null);
                         }
+
                     } else {
                         System.out.println("special character didn't enter loop");
                     }
-                } else if (isEditModeReplaceActive == true || isEditModeInsertActive == true) {
+                } else if (isEditModeReplaceActive == true) {
                     alphabetCounter++;
                     Log.d("editIndex ", "alphabetCounter" + alphabetCounter);
                     if (alphabetCounter > 20) {
@@ -704,15 +786,62 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         Character currentEditCharacter = retAlphabetString.charAt(editModeIndex);
                         Log.d("currentEditCharacter ", "currentEditCharacter" + currentEditCharacter);
                         tts.setSpeechRate(1.5f);
-                        tts.speak(currentEditCharacter.toString(), TextToSpeech.QUEUE_FLUSH, null, null);
+                        if (currentEditCharacter.toString().equals(" ")) {
+                            tts.speak("Replace at space", TextToSpeech.QUEUE_FLUSH, null, null);
+                        }
+                        tts.speak(" Replace at " + currentEditCharacter.toString(), TextToSpeech.QUEUE_FLUSH, null, null);
+                        globalEditIndex = alphabetString.indexOf(currentEditCharacter.toString());
+                        Log.d("globalEditIndex ", "globalEditIndex" + globalEditIndex);
+                        editModeIndexBuffer = editModeIndex;
+                        editModeIndex++;
+                        Log.d("Edit Counter ", "editIndex" + editModeIndex);
+                    }
+                } else if (isEditModeInsertActive == true) {
+                    alphabetCounter++;
+                    Log.d("editIndex ", "alphabetCounter" + alphabetCounter);
+                    if (alphabetCounter > 20) {
+                        alphabetCounter = 0;
+                        if (editModeIndex < 0 || editModeIndex >= editStringLength) {
+                            editModeIndex = 0;
+                        }
+                        Log.d("editIndex inside if", "alphabetCounter" + alphabetCounter);
+                        Log.d("editIndex ", "editIndex" + editModeIndex);
+                        Character currentEditCharacter = retAlphabetString.charAt(editModeIndex);
+                        Log.d("currentEditCharacter ", "currentEditCharacter" + currentEditCharacter);
+                        tts.setSpeechRate(1.5f);
+                        if (currentEditCharacter.toString().equals(" ")) {
+                            tts.speak("Insert after space", TextToSpeech.QUEUE_FLUSH, null, null);
+                        }
+                        tts.speak(" Insert after" + currentEditCharacter.toString(), TextToSpeech.QUEUE_FLUSH, null, null);
+                        globalEditIndex = alphabetString.indexOf(currentEditCharacter.toString());
                         editModeIndexBuffer = editModeIndex;
                         editModeIndex++;
                         Log.d("Edit Counter ", "editIndex" + editModeIndex);
                     }
                 }
-            }
-            else if (data.dy.getInt() < -1){ //backward scroll
+                else if  (isDeletionModeActive == true){
+                    alphabetCounter++;
+                    //deleteModeIndex = retAlphabetString.length() - 1;
+                    Log.d("editIndex ", "alphabetCounter" + alphabetCounter);
+                    if (alphabetCounter > 20) {
+                        alphabetCounter = 0;
+                        if (deleteModeIndex < 0 || deleteModeIndex >= retAlphabetString.length() - 1) {
+                            deleteModeIndex = 0;
+                        }
+
+                        deleteModeIndex--;
+                        Log.d("isDeletionModeActive scroll true", "alphabetCounter" + alphabetCounter);
+                        Log.d("deleteModeIndex ", "deleteModeIndex" + deleteModeIndex);
+                        Character currentDeleteCharacter = retAlphabetString.charAt(deleteModeIndex);
+                        Log.d("currentDeleteCharacter ", "currentDeleteCharacter" + currentDeleteCharacter);
+                        tts.setSpeechRate(1.5f);
+                        tts.speak(" Delete " + currentDeleteCharacter.toString(), TextToSpeech.QUEUE_FLUSH, null, null);
+                        Log.d("isDeletionModeActive ", "deleteModeIndex" + deleteModeIndex);
+                    }
+                }
+            } else if (data.dy.getInt() < -1) { //backward scroll
                 inScrollMode = true;
+
                 if (isAlphabetModeActive == true) {
                     Log.d("indexfinger backward scroll - scroll through alphabets", "data" + data.dy.getInt());
 
@@ -720,6 +849,31 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     Log.d("Balphabet counter val ", "alphabetCounter" + alphabetCounter);
                     if (alphabetCounter > 18) {
                         alphabetCounter = 0;
+                        if (isEditModeReplaceActive == true){
+                            globalEditIndex--;
+                            if (globalEditIndex < 0) {
+                                globalEditIndex = 0;
+                            } else if (globalEditIndex >= alphabet.length) {
+                                globalEditIndex = alphabet.length - 1;
+                            }
+                            if (globalEditIndex == 27) {
+                                Log.d("Fspeak out space ", "alphabetIndex" + globalEditIndex);
+                                String currentAlphabet = String.valueOf(alphabet[globalEditIndex]);
+                                glAlphabetString = currentAlphabet;
+                                System.out.println("FScrolling to: " + currentAlphabet);
+                                tts.setSpeechRate(1.5f);
+                                tts.speak("space", TextToSpeech.QUEUE_FLUSH, null, null);
+                                alphabetIndex = 0;//reset the position
+                            } else {
+                                Log.d("Falphabet index value", "alphabetIndex" + globalEditIndex);
+                                String currentAlphabet = String.valueOf(alphabet[globalEditIndex]);
+                                glAlphabetString = currentAlphabet;
+                                System.out.println("FScrolling to: " + currentAlphabet);
+                                System.out.println("FglAlphabetString: " + glAlphabetString);
+                                tts.setSpeechRate(1.5f);
+                                tts.speak(currentAlphabet, TextToSpeech.QUEUE_FLUSH, null, null);
+                            }
+                        }
                         alphabetIndex--;
                         if (alphabetIndex == 0) {
                             alphabetIndex = 27;
@@ -746,8 +900,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     } else {
                         Log.i("Bmk do nothing", tapIdentifier);
                     }
-                }
-                else if (isNumberModeActive == true) {
+                } else if (isNumberModeActive == true) {
                     Log.d("indexfinger backward scroll - scroll through numbers", "data" + data.dy.getInt());
 
                     alphabetCounter++;
@@ -767,44 +920,38 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         System.out.println("BScrolling to: " + currentNumber);
                         System.out.println("BglNumberString: " + glAlphabetString);
                         tts.speak(currentNumber, TextToSpeech.QUEUE_FLUSH, null, null);
-                    }
-                     else {
+                    } else {
                         Log.i("Bmk do nothing", tapIdentifier);
                     }
-                }
-                else if (isAutoSuggestionMode==true) {
+                } else if (isAutoSuggestionMode == true) {
                     Log.d("Auto Suggestions Mode", "data" + data.dy.getInt());
 
 
                     alphabetCounter++;
 
                     Log.d("Auto Suggestions Mode", "data" + data.dy.getInt());
-                    if(alphabetCounter > 10){
+                    if (alphabetCounter > 16) {
                         autoSuggestionCounter--;
                         alphabetCounter = 0;
 
-                        if (autoSuggestionCounter>=SuggestionsResult.size()){
-                            autoSuggestionCounter=0;
-                        }
-                        else {
-                            tts.speak(SuggestionsResult.get(autoSuggestionCounter),TextToSpeech.QUEUE_ADD,null,null);
+                        if (autoSuggestionCounter >= SuggestionsResult.size()) {
+                            autoSuggestionCounter = 0;
+                        } else {
+                            tts.speak(SuggestionsResult.get(autoSuggestionCounter), TextToSpeech.QUEUE_ADD, null, null);
                         }
                     }
-                }
-                else if(isspecialCharMode == true){
+                } else if (isspecialCharMode == true) {
                     alphabetCounter++;
 
                     Log.d("Special character countSpecial character count", "data" + data.dy.getInt());
-                    if(alphabetCounter > 15){
+                    if (alphabetCounter > 15) {
                         alphabetCounter = 0;
                         specialCharacterCounter++;
                         if (specialCharacterCounter < 0) {
                             specialCharacterCounter = 0;
-                        }
-                        else if (specialCharacterCounter >= specialCharacters.length) {
+                        } else if (specialCharacterCounter >= specialCharacters.length) {
                             specialCharacterCounter = specialCharacters.length - 1;
-                        }
-                        else if (specialCharacterCounter == 8){
+                        } else if (specialCharacterCounter == 8) {
                             specialCharacterCounter = 0;
                         }
 
@@ -814,43 +961,85 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         System.out.println("FScrolling to: " + currentSpecialCharacter);
                         System.out.println("FglNumberString: " + glAlphabetString);
 
-                        if(glAlphabetString.equals("#"))
-                        {
-                            tts.speak("Hash",TextToSpeech.QUEUE_FLUSH,null,null);
-                        }
-                        else if(glAlphabetString.equals("$"))
-                        {
-                            tts.speak("Dollar",TextToSpeech.QUEUE_FLUSH,null,null);
-                        }
-                        else
-                        {
+                        if (glAlphabetString.equals("#")) {
+                            tts.speak("Hash", TextToSpeech.QUEUE_FLUSH, null, null);
+                        } else if (glAlphabetString.equals("$")) {
+                            tts.speak("Dollar", TextToSpeech.QUEUE_FLUSH, null, null);
+                        } else {
                             tts.speak(currentSpecialCharacter, TextToSpeech.QUEUE_FLUSH, null, null);
                         }
-                    }
-                    else {
+                    } else {
                         System.out.println("special character didn't enter loop");
                     }
-                }
-                else if(isEditModeReplaceActive == true || isEditModeInsertActive == true) {
+                } else if (isEditModeReplaceActive == true) {
                     alphabetCounter++;
-                    if(alphabetCounter > 20){
+                    Log.d("editIndex ", "alphabetCounter" + alphabetCounter);
+                    if (alphabetCounter > 20) {
                         alphabetCounter = 0;
                         if (editModeIndex < 0 || editModeIndex >= editStringLength) {
-                            editModeIndex = editStringLength-1;
+                            editModeIndex = 0;
                         }
+                        Log.d("editIndex inside if", "alphabetCounter" + alphabetCounter);
+                        Log.d("editIndex ", "editIndex" + editModeIndex);
                         Character currentEditCharacter = retAlphabetString.charAt(editModeIndex);
+                        Log.d("currentEditCharacter ", "currentEditCharacter" + currentEditCharacter);
                         tts.setSpeechRate(1.5f);
-                        tts.speak(currentEditCharacter.toString(), TextToSpeech.QUEUE_FLUSH, null, null);
+                        if (currentEditCharacter.toString().equals(" ")) {
+                            tts.speak("Replace at space", TextToSpeech.QUEUE_FLUSH, null, null);
+                        }
+                        tts.speak(" Replace at " + currentEditCharacter.toString(), TextToSpeech.QUEUE_FLUSH, null, null);
                         editModeIndexBuffer = editModeIndex;
-                        editModeIndex--;
+                        editModeIndex++;
+                        Log.d("Edit Counter ", "editIndex" + editModeIndex);
+                    }
+                } else if (isEditModeInsertActive == true) {
+                    alphabetCounter++;
+                    Log.d("editIndex ", "alphabetCounter" + alphabetCounter);
+                    if (alphabetCounter > 20) {
+                        alphabetCounter = 0;
+                        if (editModeIndex < 0 || editModeIndex >= editStringLength) {
+                            editModeIndex = 0;
+                        }
+                        Log.d("editIndex inside if", "alphabetCounter" + alphabetCounter);
+                        Log.d("editIndex ", "editIndex" + editModeIndex);
+                        Character currentEditCharacter = retAlphabetString.charAt(editModeIndex);
+                        Log.d("currentEditCharacter ", "currentEditCharacter" + currentEditCharacter);
+                        tts.setSpeechRate(1.5f);
+                        if (currentEditCharacter.toString().equals(" ")) {
+                            tts.speak("Insert after space", TextToSpeech.QUEUE_FLUSH, null, null);
+                        }
+                        tts.speak(" Insert after" + currentEditCharacter.toString(), TextToSpeech.QUEUE_FLUSH, null, null);
+                        editModeIndexBuffer = editModeIndex;
+                        editModeIndex++;
+                        Log.d("Edit Counter ", "editIndex" + editModeIndex);
                     }
                 }
-            }
-            else {
-                inScrollMode = false;
-                Log.d("no index finger scroll","data"+data.dy.getInt());
-            }
+                else if  (isDeletionModeActive == true){
+                    alphabetCounter++;
+                    //deleteModeIndex = retAlphabetString.length();
+                    Log.d("editIndex ", "alphabetCounter" + alphabetCounter);
+                    if (alphabetCounter > 20) {
+                        alphabetCounter = 0;
+                        if (deleteModeIndex < 0 || deleteModeIndex >= retAlphabetString.length() - 1) {
+                            deleteModeIndex = 0;
+                        }
 
+                        deleteModeIndex++;
+                        Log.d("isDeletionModeActive scroll true", "alphabetCounter" + alphabetCounter);
+                        Log.d("deleteModeIndex ", "deleteModeIndex" + deleteModeIndex);
+                        Character currentDeleteCharacter = retAlphabetString.charAt(deleteModeIndex - 1);
+                        Log.d("currentDeleteCharacter ", "currentDeleteCharacter" + currentDeleteCharacter);
+                        tts.setSpeechRate(1.5f);
+                        tts.speak(" Delete " + currentDeleteCharacter.toString(), TextToSpeech.QUEUE_FLUSH, null, null);
+                        Log.d("isDeletionModeActive ", "deleteModeIndex" + deleteModeIndex);
+                    }
+                }
+                else {
+                    inScrollMode = false;
+                    Log.d("no index finger scroll", "data" + data.dy.getInt());
+                }
+
+            }
         }
 
         @Override
