@@ -323,7 +323,13 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     sb.insert(++editModeIndexBuffer,glAlphabetString.charAt(0));
                     retAlphabetString = sb.toString();
                     Log.i("isEditModeInsertActive Word",retAlphabetString);
-                    tts.speak(retAlphabetString, TextToSpeech.QUEUE_FLUSH, null, null);
+                    System.out.println("Exited EditInsert mode ");
+                    isEditModeInsertActive = false;
+                    if (isEditModeInsertActive == false) {
+                        tts.setPitch(0.5f);
+                        tts.speak(retAlphabetString, TextToSpeech.QUEUE_FLUSH, null, null);
+                        tts.setPitch(1.0f);
+                    }
                     //isAlphabetModeActive = false;
 
                     //tts.setPitch(1.5f);
@@ -332,9 +338,9 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     //}
                     //else
                     //{
-                    tts.setPitch(0.5f);
-                        System.out.println("SpeakOutRetAlphabetString ");
-                        tts.speak(retAlphabetString, TextToSpeech.QUEUE_FLUSH, null, null);
+                    //tts.setPitch(0.5f);
+                      //  System.out.println("SpeakOutRetAlphabetString ");
+                        //tts.speak(retAlphabetString, TextToSpeech.QUEUE_FLUSH, null, null);
                     //}
                     System.out.println("Exited EditInsert mode ");
                     tts.speak("Exited Edit insert mode", TextToSpeech.QUEUE_FLUSH, null, null);
@@ -457,7 +463,24 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     retAlphabetString = retAlphabetString.substring(0, deleteModeIndex);
                 }
                 else {
-                    retAlphabetString = retAlphabetString.substring(0, deleteModeIndex) + retAlphabetString.substring(deleteModeIndex); //test this
+                    System.out.println("Modifying string2");
+                    System.out.println("deleteModeIndex"+deleteModeIndex);
+                    System.out.println("Modifying string2:"+retAlphabetString.substring(0, deleteModeIndex)+"part 2:"+retAlphabetString.substring(deleteModeIndex));
+                    retAlphabetString = retAlphabetString.substring(0, deleteModeIndex) + retAlphabetString.substring(deleteModeIndex+1); //test this
+
+                    //retAlphabetString = retAlphabetString.substring(0, deleteModeIndex) + retAlphabetString.substring(deleteModeIndex); //test this
+
+                    /*char delete_char_between = retAlphabetString.charAt(deleteModeIndex);
+
+                    StringBuilder sb_deletion = new StringBuilder(retAlphabetString);
+
+                    String s = Character.toString(sb_deletion.charAt(deleteModeIndex));
+                    tts.speak(s,TextToSpeech.QUEUE_ADD,null,null);
+
+                    sb_deletion.deleteCharAt(deleteModeIndex);
+
+                    tts.playEarcon(deleteChar,TextToSpeech.QUEUE_FLUSH,null,null);
+                    retAlphabetString=sb_deletion.toString();*/
                 }
                 ;//check if this works for deletion of string in the middle
                 tts.playEarcon(deleteChar,TextToSpeech.QUEUE_FLUSH,null,null);
@@ -809,7 +832,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
                     Log.d("Auto Suggestions Mode", "data" + data.dy.getInt());
                     //autoSuggestionsMode.forwardNavigateSuggestions(tts,SuggestionsResult);
-                    if (alphabetCounter > 16) {
+                    if (alphabetCounter > 18) {
                         autoSuggestionCounter++;
                         alphabetCounter = 0;
 
@@ -890,7 +913,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         Character currentEditCharacter = retAlphabetString.charAt(editModeIndex);
                         Log.d("currentEditCharacter ", "currentEditCharacter" + currentEditCharacter);
                         tts.setSpeechRate(1.5f);
-                        if (Character.isWhitespace(currentEditCharacter)) {
+                        if (currentEditCharacter == ' ') {
                             tts.speak("Insert after space", TextToSpeech.QUEUE_FLUSH, null, null);
                         }
                         tts.speak(" Insert after" + currentEditCharacter.toString(), TextToSpeech.QUEUE_FLUSH, null, null);
@@ -1104,7 +1127,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         Character currentEditCharacter = retAlphabetString.charAt(editModeIndex);
                         Log.d("currentEditCharacter ", "currentEditCharacter" + currentEditCharacter);
                         tts.setSpeechRate(1.5f);
-                        if (Character.isWhitespace(currentEditCharacter)) {
+                        if (currentEditCharacter == ' ') {
                             tts.speak("Insert after space", TextToSpeech.QUEUE_FLUSH, null, null);
                         }
                         tts.speak(" Insert after" + currentEditCharacter.toString(), TextToSpeech.QUEUE_FLUSH, null, null);
@@ -1121,12 +1144,16 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         alphabetCounter = 0;
                         if (deleteModeIndex < 0 || deleteModeIndex >= retAlphabetString.length() - 1) {
                             deleteModeIndex = 0;
+                            Log.d("isDeletionModeActive scroll true", "alphabetCounter" + alphabetCounter);
+                            Log.d("deleteModeIndex ", "deleteModeIndex" + deleteModeIndex);
+                        }
+                        else {
+                            deleteModeIndex++;
+                            Log.d("isDeletionModeActive scroll true", "alphabetCounter" + alphabetCounter);
+                            Log.d("deleteModeIndex ", "deleteModeIndex" + deleteModeIndex);
                         }
 
-                        deleteModeIndex++;
-                        Log.d("isDeletionModeActive scroll true", "alphabetCounter" + alphabetCounter);
-                        Log.d("deleteModeIndex ", "deleteModeIndex" + deleteModeIndex);
-                        Character currentDeleteCharacter = retAlphabetString.charAt(deleteModeIndex - 1);
+                        Character currentDeleteCharacter = retAlphabetString.charAt(deleteModeIndex);
                         Log.d("currentDeleteCharacter ", "currentDeleteCharacter" + currentDeleteCharacter);
                         tts.setSpeechRate(1.5f);
                         if (currentDeleteCharacter.equals(" ")) {
