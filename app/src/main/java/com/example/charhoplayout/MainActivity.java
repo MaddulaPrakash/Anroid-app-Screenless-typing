@@ -110,6 +110,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     public int autoSuggestionCounter = 0;
 
     private int specialCharacterCounter = 0;
+
+    private int deleteInsertIndex = 0;
     private boolean selectingAlphabet = false;
     private String selectedAlphabet = null;
 
@@ -301,26 +303,18 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             else if(isAlphabetModeActive == true & data == 2){
                 Log.d("Alphabet selected ","data"+data);
 
-
                 if(isEditModeReplaceActive == false & isEditModeInsertActive == false){
                     retAlphabetString += glAlphabetString;
                     Log.d("Alphabet isEditModeReplaceActive-false ","retAlphabetString"+retAlphabetString);
                 }
-                /*else if(isEditModeReplaceActive==true & isEditModeInsertActive == false& !retAlphabetString.isEmpty()){
-                    char[] charArray  = retAlphabetString.toCharArray();
-                    System.out.println("isEditModeReplaceActive true - charArray: " + Arrays.toString(charArray));
-                    System.out.println("isEditModeReplaceActive true - glAlphabetString 0: " + glAlphabetString.charAt(0));
-                    System.out.println("isEditModeReplaceActive true - charArray editModeIndexBuffer: " + charArray[editModeIndexBuffer]);
-                    charArray[editModeIndexBuffer] = glAlphabetString.charAt(0);
-                    retAlphabetString = new String(charArray);
-                    isAlphabetModeActive = false;
-                }*/
-                else if(isEditModeReplaceActive==false & isEditModeInsertActive == true& !retAlphabetString.isEmpty()){
+                else if(isEditModeInsertActive == true& !retAlphabetString.isEmpty()){
                     System.out.println("isEditModeInsertActive true - glAlphabetString 0: " + glAlphabetString.charAt(0));
                     System.out.println("isEditModeInsertActive true - editModeIndexBuffer  " + editModeIndexBuffer);
 
                     StringBuilder sb = new StringBuilder(retAlphabetString);
-                    sb.insert(++editModeIndexBuffer,glAlphabetString.charAt(0));
+                    if(!glAlphabetString.isEmpty()) {
+                        sb.insert(editModeIndexBuffer, glAlphabetString.charAt(0));
+                    }
                     retAlphabetString = sb.toString();
                     Log.i("isEditModeInsertActive Word",retAlphabetString);
                     System.out.println("Exited EditInsert mode ");
@@ -434,12 +428,49 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
                 isspecialCharMode = false;
 
-                String deleted_alphabet = String.valueOf(retAlphabetString.charAt(retAlphabetString.length() - 1));
-                System.out.println(" Deletion retAlphabetString: " + retAlphabetString);
-                //tts.speak(deleted_alphabet,TextToSpeech.QUEUE_ADD,null,null);
-                tts.speak("delete at "+ deleted_alphabet.toString(), TextToSpeech.QUEUE_ADD, null, null);
+                if (isEditModeInsertActive == false) {
+                    String deleted_alphabet = String.valueOf(retAlphabetString.charAt(retAlphabetString.length() - 1));
+                    System.out.println(" Deletion retAlphabetString: " + retAlphabetString);
+                    //tts.speak(deleted_alphabet,TextToSpeech.QUEUE_ADD,null,null);
+                    tts.speak("delete at " + deleted_alphabet.toString(), TextToSpeech.QUEUE_ADD, null, null);
 
-                deleteModeIndex = retAlphabetString.length() - 1;
+                    deleteModeIndex = retAlphabetString.length() - 1;
+                }
+                else if (isEditModeInsertActive == true){
+                    if (editModeIndex == retAlphabetString.length() -1)  {
+                        retAlphabetString = retAlphabetString.substring(0, editModeIndex - 1);
+                    }
+                    else {
+                        System.out.println("Modifying string2");
+                        System.out.println("deleteModeIndex"+editModeIndex);
+                        deleteInsertIndex =  editModeIndex - 1;
+                        System.out.println("Modifying string2:"+retAlphabetString.substring(0, editModeIndex -1)+"part 2:"+retAlphabetString.substring(editModeIndex -1));
+                        retAlphabetString = retAlphabetString.substring(0, editModeIndex - 1) + retAlphabetString.substring(editModeIndex); //test this
+
+                        //retAlphabetString = retAlphabetString.substring(0, deleteModeIndex) + retAlphabetString.substring(deleteModeIndex); //test this
+
+                    /*char delete_char_between = retAlphabetString.charAt(deleteModeIndex);
+
+                    StringBuilder sb_deletion = new StringBuilder(retAlphabetString);
+
+                    String s = Character.toString(sb_deletion.charAt(deleteModeIndex));
+                    tts.speak(s,TextToSpeech.QUEUE_ADD,null,null);
+
+                    sb_deletion.deleteCharAt(deleteModeIndex);
+
+                    tts.playEarcon(deleteChar,TextToSpeech.QUEUE_FLUSH,null,null);
+                    retAlphabetString=sb_deletion.toString();*/
+                    }
+                    ;//check if this works for deletion of string in the middle
+                    tts.playEarcon(deleteChar,TextToSpeech.QUEUE_FLUSH,null,null);
+
+                    System.out.println(" Deletion retAlphabetString: " + retAlphabetString);
+
+                    //isEditModeInsertActive = false;
+                    //editModeIndex = 0;
+
+
+                }
                 //retAlphabetString = retAlphabetString.substring(0, retAlphabetString.length() - 1);
                 //tts.playEarcon(deleteChar,TextToSpeech.QUEUE_FLUSH,null,null);
 
@@ -902,7 +933,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     }
                 }*/ else if (isEditModeInsertActive == true) {
                     alphabetCounter++;
-                    Log.d("editIndex ", "alphabetCounter" + alphabetCounter);
                     if (alphabetCounter > 20) {
                         alphabetCounter = 0;
                         if (editModeIndex < 0 || editModeIndex >= editStringLength) {
@@ -910,13 +940,16 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         }
                         Log.d("editIndex inside if", "alphabetCounter" + alphabetCounter);
                         Log.d("editIndex ", "editIndex" + editModeIndex);
+                        if(editModeIndex > retAlphabetString.length()){
+                            editModeIndex = retAlphabetString.length() - 1;
+                        }
                         Character currentEditCharacter = retAlphabetString.charAt(editModeIndex);
                         Log.d("currentEditCharacter ", "currentEditCharacter" + currentEditCharacter);
                         tts.setSpeechRate(1.5f);
                         if (currentEditCharacter == ' ') {
-                            tts.speak("Insert after space", TextToSpeech.QUEUE_FLUSH, null, null);
+                            tts.speak("At space", TextToSpeech.QUEUE_FLUSH, null, null);
                         }
-                        tts.speak(" Insert after" + currentEditCharacter.toString(), TextToSpeech.QUEUE_FLUSH, null, null);
+                        tts.speak(" At " + currentEditCharacter.toString(), TextToSpeech.QUEUE_FLUSH, null, null);
                         globalEditIndex = alphabetString.indexOf(currentEditCharacter.toString());
                         editModeIndexBuffer = editModeIndex;
                         editModeIndex++;
@@ -982,7 +1015,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                             }
                         }
                         alphabetIndex--;
-                        if (alphabetIndex == 0) {
+                        if (alphabetIndex <= 0) {
                             alphabetIndex = 27;
                         } else if (alphabetIndex >= alphabet.length) {
                             alphabetIndex = alphabet.length - 1;
@@ -1128,9 +1161,9 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         Log.d("currentEditCharacter ", "currentEditCharacter" + currentEditCharacter);
                         tts.setSpeechRate(1.5f);
                         if (currentEditCharacter == ' ') {
-                            tts.speak("Insert after space", TextToSpeech.QUEUE_FLUSH, null, null);
+                            tts.speak("At space", TextToSpeech.QUEUE_FLUSH, null, null);
                         }
-                        tts.speak(" Insert after" + currentEditCharacter.toString(), TextToSpeech.QUEUE_FLUSH, null, null);
+                        tts.speak(" At" + currentEditCharacter.toString(), TextToSpeech.QUEUE_FLUSH, null, null);
                         editModeIndexBuffer = editModeIndex;
                         editModeIndex++;
                         Log.d("Edit Counter ", "editIndex" + editModeIndex);
